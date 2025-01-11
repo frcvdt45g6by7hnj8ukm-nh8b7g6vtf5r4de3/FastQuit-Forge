@@ -1,32 +1,35 @@
 package com.kingcontaria.fastquit;
 
+import com.kingcontaria.fastquit.mixin.LevelStorageSessionAccessor;
 import com.kingcontaria.fastquit.mixin.MinecraftClientAccessor;
 import com.kingcontaria.fastquit.mixin.MinecraftServerAccessor;
-import com.kingcontaria.fastquit.mixin.LevelStorageSessionAccessor;
-import com.mojang.logging.LogUtils;
+import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.Toml4jConfigSerializer;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.text.Text;
-import net.minecraft.world.level.storage.LevelStorage;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraftforge.client.ConfigScreenHandler;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.nio.file.Path;
 import java.util.*;
 
-public final class FastQuit implements ClientModInitializer {
+@Mod("fastquit")
+public final class FastQuit {
 
-    public static final ModMetadata FASTQUIT = FabricLoader.getInstance().getModContainer("fastquit").orElseThrow().getMetadata();
-    private static final Logger LOGGER = LogUtils.getLogger();
-    private static final String LOG_PREFIX = "[" + FASTQUIT.getName() + "] ";
-    public static final FastQuitConfig CONFIG = AutoConfig.register(FastQuitConfig.class, Toml4jConfigSerializer::new).getConfig();
+//    public static final ModMetadata FASTQUIT = FabricLoader.getInstance().getModContainer("fastquit").orElseThrow().getMetadata();
+    public static final Logger LOGGER = LoggerFactory.getLogger("fastquit");
+//    private static final String LOG_PREFIX = "[" + FASTQUIT.getName() + "] ";
+    public static final FastQuitConfig CONFIG;
+
 
     /**
      * Synchronized {@link Map} containing all currently saving {@link IntegratedServer}'s, with a {@link WorldInfo} with more information about the world.
@@ -34,12 +37,17 @@ public final class FastQuit implements ClientModInitializer {
     public static final Map<IntegratedServer, WorldInfo> savingWorlds = Collections.synchronizedMap(new HashMap<>());
 
     /**
-     * Stores {@link LevelStorage.Session}'s used by FastQuit as to only close them if no other process is currently using them.
+     * Stores {@link LevelStorageSource.LevelStorageAccess}'s used by FastQuit as to only close them if no other process is currently using them.
      */
-    public static final List<LevelStorage.Session> occupiedSessions = Collections.synchronizedList(new ArrayList<>());
+    public static final List<LevelStorageSource.LevelStorageAccess> occupiedSessions = Collections.synchronizedList(new ArrayList<>());
 
-    @Override
-    public void onInitializeClient() {
+    static {
+        AutoConfig.register(FastQuitConfig.class, Toml4jConfigSerializer::new);
+        CONFIG = AutoConfig.getConfigHolder(FastQuitConfig.class).getConfig();
+    }
+
+    public FastQuit() {
+        ModLoadingContext.get().registerExtensionPoint(FastQuitConfigScreen.FACTORY.getClass(), () -> FastQuitConfigScreen.FACTORY);
         log("Initialized");
     }
 
@@ -47,21 +55,21 @@ public final class FastQuit implements ClientModInitializer {
      * Logs the given message.
      */
     public static void log(String msg) {
-        LOGGER.info(LOG_PREFIX + msg);
+        LOGGER.info(msg);
     }
 
     /**
      * Logs the given warning.
      */
     public static void warn(String msg) {
-        LOGGER.warn(LOG_PREFIX + msg);
+        LOGGER.warn(msg);
     }
 
     /**
      * Logs the given message and error.
      */
     public static void error(String msg, Throwable throwable) {
-        LOGGER.error(LOG_PREFIX + msg, throwable);
+        LOGGER.error(msg, throwable);
     }
 
     /**
@@ -77,9 +85,9 @@ public final class FastQuit implements ClientModInitializer {
             error("Something went horribly wrong when exiting FastQuit!", throwable);
             savingWorlds.forEach((server, info) -> {
                 try {
-                    server.getThread().join();
+                    server.getRunningThread().join();
                 } catch (Throwable throwable2) {
-                    error("Failed to wait for \"" + server.getSaveProperties().getLevelName() + "\"", throwable2);
+                    error("Failed to wait for \"" + server.getWorldData().getLevelName() + "\"", throwable2);
                 }
             });
         }
@@ -117,10 +125,10 @@ public final class FastQuit implements ClientModInitializer {
             return;
         }
 
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
 
-        if (!client.isOnThread()) {
-            if (servers.stream().anyMatch(server -> Thread.currentThread() == server.getThread())) {
+        if (!client.isSameThread()) {
+            if (servers.stream().anyMatch(server -> Thread.currentThread() == server.getRunningThread())) {
                 throw new IllegalStateException("Tried to call FastQuit.wait(...) from one of the servers it's supposed to wait for.");
             }
 
@@ -128,20 +136,20 @@ public final class FastQuit implements ClientModInitializer {
             return;
         }
 
-        Screen oldScreen = client.currentScreen;
+        Screen oldScreen = client.screen;
 
-        Text stillSaving = TextHelper.translatable("fastquit.screen.waiting", String.join("\" & \"", servers.stream().map(server -> server.getSaveProperties().getLevelName()).toList()));
+        Component stillSaving = TextHelper.translatable("fastquit.screen.waiting", String.join("\" & \"", servers.stream().map(server -> server.getWorldData().getLevelName()).toList()));
         log(stillSaving.getString());
 
-        servers.forEach(server -> server.getThread().setPriority(Thread.NORM_PRIORITY));
+        servers.forEach(server -> server.getRunningThread().setPriority(Thread.NORM_PRIORITY));
 
         try {
             client.setScreen(new WaitingScreen(stillSaving, cancellable));
 
-            while (servers.stream().anyMatch(server -> !server.isStopping())) {
+            while (servers.stream().anyMatch(server -> !server.isShutdown())) {
                 if (cancellable != null && cancellable.isCancelled()) {
                     if (CONFIG.backgroundPriority != 0) {
-                        servers.forEach(server -> server.getThread().setPriority(CONFIG.backgroundPriority));
+                        servers.forEach(server -> server.getRunningThread().setPriority(CONFIG.backgroundPriority));
                     }
                     log("Cancelled waiting for currently saving worlds.");
                     break;
@@ -151,38 +159,35 @@ public final class FastQuit implements ClientModInitializer {
         } finally {
             // compatibility with "WorldGen" mod
             if (oldScreen != null && oldScreen.getClass().getName().equals("caeruleusTait.WorldGen.gui.screens.WGConfigScreen")) {
-                client.currentScreen = oldScreen;
+                client.screen = oldScreen;
             } else {
-                client.setScreenAndRender(oldScreen);
+                client.forceSetScreen(oldScreen);
             }
         }
     }
 
     /**
-     * @return optionally returns the currently saving {@link IntegratedServer} matching the given {@link Path}
+     * @return optionally returns the currently {@link IntegratedServer} matching the given {@link Path}
      */
     public static Optional<IntegratedServer> getSavingWorld(Path path) {
-        // noinspection resource
         return savingWorlds.keySet().stream().filter(server -> ((LevelStorageSessionAccessor) ((MinecraftServerAccessor) server).fastquit$getSession()).fastquit$getDirectory().path().equals(path)).findFirst();
     }
 
     /**
-     * @return optionally returns the currently saving {@link IntegratedServer} matching the given {@link LevelStorage.Session}
+     * @return optionally returns the currently saving {@link IntegratedServer} matching the given {@link LevelStorageSource.LevelStorageAccess}
      */
-    public static Optional<IntegratedServer> getSavingWorld(LevelStorage.Session session) {
-        // noinspection resource
+    public static Optional<IntegratedServer> getSavingWorld(LevelStorageSource.LevelStorageAccess session) {
         return savingWorlds.keySet().stream().filter(server -> ((MinecraftServerAccessor) server).fastquit$getSession() == session).findFirst();
     }
 
     /**
-     * @apiNote Remember to {@link LevelStorage.Session#close() close} the session after using it!
-     * @return optionally returns the {@link LevelStorage.Session} of the currently saving {@link IntegratedServer} matching the given {@link Path}
+     * @apiNote Remember to {@link LevelStorageSource.LevelStorageAccess#close() close} the session after using it!
+     * @return optionally returns the {@link LevelStorageSource.LevelStorageAccess} of the currently saving {@link IntegratedServer} matching the given {@link Path}
      */
-    public static Optional<LevelStorage.Session> getSession(Path path) {
+    public static Optional<LevelStorageSource.LevelStorageAccess> getSession(Path path) {
         return getSavingWorld(path).flatMap(server -> {
-            LevelStorage.Session session;
+            LevelStorageSource.LevelStorageAccess session;
             synchronized (session = ((MinecraftServerAccessor) server).fastquit$getSession()) {
-                // noinspection resource
                 if (((LevelStorageSessionAccessor) session).fastquit$getLock().isValid()) {
                     occupiedSessions.add(session);
                     return Optional.of(session);

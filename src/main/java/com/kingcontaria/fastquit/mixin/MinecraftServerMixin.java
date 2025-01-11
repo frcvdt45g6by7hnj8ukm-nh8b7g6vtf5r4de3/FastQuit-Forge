@@ -4,13 +4,13 @@ import com.kingcontaria.fastquit.FastQuit;
 import com.kingcontaria.fastquit.FastQuitConfig;
 import com.kingcontaria.fastquit.TextHelper;
 import com.kingcontaria.fastquit.WorldInfo;
-import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.toast.SystemToast;
+import com.llamalad7.mixinextras.injector.WrapWithCondition;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.PlayerManager;
-import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.text.MutableText;
+import net.minecraft.server.players.PlayerList;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,43 +24,32 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin {
 
-    @Shadow
-    @Final
-    private static Logger LOGGER;
+    @Shadow @Final private static Logger LOGGER;
 
-    @Inject(
-            method = "exit",
-            at = @At("RETURN")
-    )
+    @Inject(method = "onServerExit", at = @At("RETURN"))
     private void fastquit$finishSaving(CallbackInfo ci) {
         //noinspection ConstantConditions
         if ((Object) this instanceof IntegratedServer server) {
             WorldInfo info = FastQuit.savingWorlds.remove(server);
 
             if (info == null) {
-                FastQuit.warn("\"" + server.getSaveProperties().getLevelName() + "\" was not registered in currently saving worlds!");
+                FastQuit.warn("\"" + server.getWorldData().getLevelName() + "\" was not registered in currently saving worlds!");
                 return;
             }
 
-            MutableText description = TextHelper.translatable("fastquit.toast." + (info.deleted ? "deleted" : "description"), server.getSaveProperties().getLevelName());
+            MutableComponent description = TextHelper.translatable("fastquit.toast." + (info.deleted ? "deleted" : "description"), server.getWorldData().getLevelName());
             if (FastQuit.CONFIG.showSavingTime != FastQuitConfig.ShowSavingTime.FALSE && !info.deleted) {
                 description.append(" (" + info.getTimeSaving() + ")");
             }
             if (FastQuit.CONFIG.showToasts) {
-                MinecraftClient.getInstance().submit(() -> MinecraftClient.getInstance().getToastManager().add(new SystemToast(SystemToast.Type.WORLD_BACKUP, TextHelper.translatable("fastquit.toast.title"), description)));
+                Minecraft.getInstance().submit(() -> Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastIds.WORLD_BACKUP, TextHelper.translatable("fastquit.toast.title"), description)));
             }
             FastQuit.log(description.getString());
         }
     }
 
-    @WrapWithCondition(
-            method = "shutdown",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/server/PlayerManager;saveAllPlayerData()V"
-            )
-    )
-    private boolean fastquit$cancelPlayerSavingIfDeleted(PlayerManager playerManager) {
+    @WrapWithCondition(method = "stopServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;saveAll()V"))
+    private boolean fastquit$cancelPlayerSavingIfDeleted(PlayerList playerManager) {
         if (this.isDeleted()) {
             LOGGER.info("Cancelled saving players because level was deleted");
             return false;
@@ -68,20 +57,7 @@ public abstract class MinecraftServerMixin {
         return true;
     }
 
-    @Inject(
-            method = "save",
-            at = {
-                    @At(
-                            value = "INVOKE",
-                            target = "Ljava/util/Iterator;next()Ljava/lang/Object;"
-                    ),
-                    @At(
-                            value = "INVOKE",
-                            target = "Lnet/minecraft/world/level/storage/LevelStorage$Session;backupLevelDataFile(Lnet/minecraft/registry/DynamicRegistryManager;Lnet/minecraft/world/SaveProperties;Lnet/minecraft/nbt/NbtCompound;)V"
-                    )
-            },
-            cancellable = true
-    )
+    @Inject(method = "saveAllChunks", at = {@At(value = "INVOKE", target = "Ljava/util/Iterator;next()Ljava/lang/Object;"), @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;saveDataTag(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/level/storage/WorldData;Lnet/minecraft/nbt/CompoundTag;)V")}, cancellable = true)
     private void fastquit$cancelSavingIfDeleted(CallbackInfoReturnable<Boolean> cir) {
         if (this.isDeleted()) {
             LOGGER.info("Cancelled saving worlds because level was deleted");

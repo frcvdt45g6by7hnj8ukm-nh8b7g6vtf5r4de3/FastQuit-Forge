@@ -8,10 +8,11 @@ import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.gui.entries.SelectionListEntry;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.server.IntegratedServer;
+import net.minecraftforge.client.ConfigScreenHandler;
+import net.minecraftforge.fml.ModList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
@@ -62,7 +63,6 @@ public class FastQuitConfig implements ConfigData {
      * This {@link Set} holds the names of all currently active mods that conflict with {@link FastQuitConfig#allowMultipleServers}.
      * @see FastQuitConfig#allowMultipleServers()
      */
-    @ConfigEntry.Gui.Excluded
     private static final Set<String> MODS_THAT_CONFLICT_WITH_MULTIPLE_SERVERS = new HashSet<>();
 
     static {
@@ -70,7 +70,8 @@ public class FastQuitConfig implements ConfigData {
         Set<String> incompatibleModIDs = Set.of("quilt_biome");
 
         for (String modID : incompatibleModIDs) {
-            FabricLoader.getInstance().getModContainer(modID).ifPresent(modContainer -> MODS_THAT_CONFLICT_WITH_MULTIPLE_SERVERS.add(modContainer.getMetadata().getName()));
+            ModList.get().getModContainerById(modID).ifPresent(modContainer -> MODS_THAT_CONFLICT_WITH_MULTIPLE_SERVERS.add(modContainer.getModInfo().getDisplayName()));
+//            FabricLoader.getInstance().getModContainer(modID).ifPresent(modContainer -> MODS_THAT_CONFLICT_WITH_MULTIPLE_SERVERS.add(modContainer.getMetadata().getName()));
         }
     }
 
@@ -83,7 +84,6 @@ public class FastQuitConfig implements ConfigData {
         }
         return this.allowMultipleServers;
     }
-
     /**
      * @return Returns a config screen built with Cloth Config API
      */
@@ -92,7 +92,7 @@ public class FastQuitConfig implements ConfigData {
 
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
-                .setTitle(TextHelper.translatable("text.autoconfig.fastquit.title"))
+                .setTitle(TextHelper.literal(FastQuit.LOGGER.getName()))
                 .setSavingRunnable(() -> AutoConfig.getConfigHolder(FastQuitConfig.class).save());
 
         ConfigEntryBuilder entryBuilder = builder.entryBuilder();
@@ -161,7 +161,7 @@ public class FastQuitConfig implements ConfigData {
         } else {
             modCompatCategory.addEntry(entryBuilder.startEnumSelector(TextHelper.translatable("text.autoconfig.fastquit.option.allowMultipleServers"), ModCompat.class, ModCompat.DISABLED)
                     .setTooltip(TextHelper.translatable("text.autoconfig.fastquit.option.allowMultipleServers.@Tooltip").append("\n\n").append(TextHelper.translatable("fastquit.config.compat.allowMultipleServers.disabledForCompat", String.join(", ", MODS_THAT_CONFLICT_WITH_MULTIPLE_SERVERS))))
-                    .setEnumNameProvider(disabled -> TextHelper.translatable("addServer.resourcePack.disabled").styled(style -> style.withColor(Formatting.RED)))
+                    .setEnumNameProvider(disabled -> TextHelper.translatable("addServer.resourcePack.disabled").withStyle(style -> style.withColor(ChatFormatting.RED)))
                     .build()
             );
         }
