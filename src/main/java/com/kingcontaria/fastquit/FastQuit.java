@@ -3,7 +3,6 @@ package com.kingcontaria.fastquit;
 import com.kingcontaria.fastquit.mixin.LevelStorageSessionAccessor;
 import com.kingcontaria.fastquit.mixin.MinecraftClientAccessor;
 import com.kingcontaria.fastquit.mixin.MinecraftServerAccessor;
-import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.Toml4jConfigSerializer;
 import net.minecraft.client.Minecraft;

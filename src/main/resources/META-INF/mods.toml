@@ -4,7 +4,7 @@ license = "MIT"
 [[mods]]
 modId = "fastquit"
 logoFile = "icon.png"
-version = "3.0.0"
+version = "3.0.0+1.20.1forge"
 displayName = "FastQuit"
 description = "This mod lets you return to the Title Screen early while your world is still saving in the background."
 authors = "KingContaria, Kaleb Langley"
