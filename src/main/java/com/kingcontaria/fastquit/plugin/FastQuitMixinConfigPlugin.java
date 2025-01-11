@@ -15,7 +15,7 @@ public class FastQuitMixinConfigPlugin implements IMixinConfigPlugin {
 
     @Override
     public void onLoad(String mixinPackage) {
-        MixinExtrasBootstrap.init();
+//        MixinExtrasBootstrap.init();
     }
 
     @Override

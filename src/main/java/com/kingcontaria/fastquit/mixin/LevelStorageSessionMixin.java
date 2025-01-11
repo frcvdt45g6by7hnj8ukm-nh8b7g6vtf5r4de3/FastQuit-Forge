@@ -2,7 +2,7 @@ package com.kingcontaria.fastquit.mixin;
 
 import com.kingcontaria.fastquit.FastQuit;
 import com.kingcontaria.fastquit.plugin.Synchronized;
-import com.llamalad7.mixinextras.injector.WrapWithCondition;
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;

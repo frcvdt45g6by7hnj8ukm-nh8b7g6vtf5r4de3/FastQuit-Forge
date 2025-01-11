@@ -12,8 +12,8 @@ buildscript {
 plugins {
 	id 'eclipse'
 	id 'idea'
-	id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
-	id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+	id 'maven-publish'
+	id 'net.minecraftforge.gradle' version '[6.0,6.2)'
 }
 
 apply plugin: 'org.spongepowered.mixin'
@@ -30,9 +30,8 @@ java {
 }
 
 minecraft {
-	mappings channel: mapping_channel, version: mapping_version
+	mappings channel: "official", version: "1.20.1"
 	copyIdeResources = true
-	accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
 	runs {
 		configureEach {
@@ -67,7 +66,7 @@ minecraft {
 		}
 	}
 }
-//
+
 //loom {
 //	//accessWidenerPath = file("src/main/resources/mls.accesswidener")
 //
@@ -99,6 +98,9 @@ repositories {
 
 dependencies {
 	minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+//	minecraft "net.minecraftforge:forge:${project.minecraft_version}"
+//	mappings(loom.officialMojangMappings())
+//	forge "net.minecraftforge:forge:1.20.1-${project.forge_version}"
 
 	implementation("me.shedaniel.cloth:cloth-config-forge:${project.cloth_config_version}")
 
@@ -122,7 +124,7 @@ tasks.named('processResources', ProcessResources).configure {
 
 	filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
 		expand replaceProperties + [project: project]
-	}}
+}}
 
 // Example for how to get properties into the manifest for reading at runtime.
 tasks.named('jar', Jar).configure {
