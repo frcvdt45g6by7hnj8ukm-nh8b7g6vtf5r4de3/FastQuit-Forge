@@ -25,7 +25,7 @@ public abstract class LevelStorageMixin {
         FastQuit.getSavingWorld(this.baseDir.resolve(levelName)).ifPresent(FastQuit::wait);
     }
 
-    @Inject(method = "*", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V", args = {"ldc=Failed to read"}), cancellable = true, remap = false)
+    @Inject(method = "lambda$loadLevelSummaries$2(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelDirectory;)Lnet/minecraft/world/level/storage/LevelSummary;", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"), cancellable = true)
     private void fastquit$addCurrentlySavingLevelsToWorldList(LevelStorageSource.LevelDirectory levelSave, CallbackInfoReturnable<LevelSummary> cir) {
         FastQuit.getSession(levelSave.path()).ifPresent(session -> {
             try (session) {

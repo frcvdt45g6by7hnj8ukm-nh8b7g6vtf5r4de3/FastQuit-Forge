@@ -15,13 +15,8 @@ public abstract class EditWorldScreenMixin {
 
     @Shadow @Final private LevelStorageSource.LevelStorageAccess levelAccess;
 
-    @Inject(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/worldselection/EditWorldScreen;makeBackupAndShowToast(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;)Z", ordinal = 0), cancellable = true)
+    @Inject(method = {"lambda$init$8(Lnet/minecraft/client/gui/components/Button;)V", "lambda$init$5(Lnet/minecraft/client/gui/components/Button;)V"}, at = @At(value = "HEAD"), cancellable = true)
     private void fastquit$waitForSaveOnBackup(CallbackInfo ci) {
-        FastQuit.getSavingWorld(this.levelAccess).ifPresent(server -> FastQuit.wait(server, ci));
-    }
-
-    @Inject(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V", ordinal = 0), cancellable = true)
-    private void fastquit$waitForSaveOnOptimizeWorld(CallbackInfo ci) {
         FastQuit.getSavingWorld(this.levelAccess).ifPresent(server -> FastQuit.wait(server, ci));
     }
 }
