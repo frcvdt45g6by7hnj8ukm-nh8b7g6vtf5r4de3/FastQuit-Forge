@@ -1,6 +1,8 @@
 package com.kingcontaria.fastquit.mixin;
 
 import com.kingcontaria.fastquit.FastQuit;
+import com.kingcontaria.fastquit.mixin.accessor.LevelInfoAccessor;
+import com.kingcontaria.fastquit.mixin.accessor.LevelPropertiesAccessor;
 import com.kingcontaria.fastquit.plugin.Synchronized;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.mojang.datafixers.util.Pair;

@@ -1,4 +1,4 @@
-package com.kingcontaria.fastquit.mixin;
+package com.kingcontaria.fastquit.mixin.accessor;
 
 import net.minecraft.util.DirectoryLock;
 import net.minecraft.world.level.storage.LevelStorageSource;

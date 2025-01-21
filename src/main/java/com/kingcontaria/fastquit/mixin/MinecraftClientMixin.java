@@ -1,8 +1,8 @@
 package com.kingcontaria.fastquit.mixin;
 
 import com.kingcontaria.fastquit.FastQuit;
-import com.kingcontaria.fastquit.TextHelper;
-import com.kingcontaria.fastquit.WorldInfo;
+import com.kingcontaria.fastquit.util.TextHelper;
+import com.kingcontaria.fastquit.util.WorldInfo;
 import com.llamalad7.mixinextras.injector.WrapWithCondition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;

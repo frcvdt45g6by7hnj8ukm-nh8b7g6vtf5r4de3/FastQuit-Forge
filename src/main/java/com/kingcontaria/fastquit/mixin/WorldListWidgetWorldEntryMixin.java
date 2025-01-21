@@ -1,8 +1,8 @@
 package com.kingcontaria.fastquit.mixin;
 
 import com.kingcontaria.fastquit.FastQuit;
-import com.kingcontaria.fastquit.FastQuitConfig;
-import com.kingcontaria.fastquit.WorldInfo;
+import com.kingcontaria.fastquit.config.FastQuitConfig;
+import com.kingcontaria.fastquit.util.WorldInfo;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.Minecraft;

@@ -1,8 +1,12 @@
 package com.kingcontaria.fastquit;
 
-import com.kingcontaria.fastquit.mixin.LevelStorageSessionAccessor;
-import com.kingcontaria.fastquit.mixin.MinecraftClientAccessor;
-import com.kingcontaria.fastquit.mixin.MinecraftServerAccessor;
+import com.kingcontaria.fastquit.config.FastQuitConfig;
+import com.kingcontaria.fastquit.mixin.accessor.LevelStorageSessionAccessor;
+import com.kingcontaria.fastquit.mixin.accessor.MinecraftClientAccessor;
+import com.kingcontaria.fastquit.mixin.accessor.MinecraftServerAccessor;
+import com.kingcontaria.fastquit.screen.WaitingScreen;
+import com.kingcontaria.fastquit.util.TextHelper;
+import com.kingcontaria.fastquit.util.WorldInfo;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.Toml4jConfigSerializer;
 import net.minecraft.client.Minecraft;
@@ -24,10 +28,9 @@ import java.util.*;
 @Mod("fastquit")
 public final class FastQuit {
 
-//    public static final ModMetadata FASTQUIT = FabricLoader.getInstance().getModContainer("fastquit").orElseThrow().getMetadata();
     public static final Logger LOGGER = LoggerFactory.getLogger("fastquit");
-//    private static final String LOG_PREFIX = "[" + FASTQUIT.getName() + "] ";
     public static final FastQuitConfig CONFIG;
+    public static final ConfigScreenHandler.ConfigScreenFactory FACTORY = new ConfigScreenHandler.ConfigScreenFactory(FastQuitConfig::getConfigScreen);
 
 
     /**
@@ -46,8 +49,8 @@ public final class FastQuit {
     }
 
     public FastQuit() {
-        ModLoadingContext.get().registerExtensionPoint(FastQuitConfigScreen.FACTORY.getClass(), () -> FastQuitConfigScreen.FACTORY);
-        log("Initialized");
+        ModLoadingContext.get().registerExtensionPoint(FACTORY.getClass(), () -> FACTORY);
+        log("FastQuit Initialized!");
     }
 
     /**
