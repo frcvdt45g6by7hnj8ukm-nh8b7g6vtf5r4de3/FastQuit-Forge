@@ -1,6 +1,5 @@
 package com.kingcontaria.fastquit.screen;
 
-import com.kingcontaria.fastquit.FastQuit;
 import com.kingcontaria.fastquit.util.ModLogger;
 import com.kingcontaria.fastquit.util.TextHelper;
 import net.minecraft.Util;

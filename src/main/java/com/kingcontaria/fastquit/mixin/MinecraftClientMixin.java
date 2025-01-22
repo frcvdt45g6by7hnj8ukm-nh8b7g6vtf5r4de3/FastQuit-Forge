@@ -1,6 +1,5 @@
 package com.kingcontaria.fastquit.mixin;
 
-import com.kingcontaria.fastquit.FastQuit;
 import com.kingcontaria.fastquit.config.ModConfigManager;
 import com.kingcontaria.fastquit.util.ModLogger;
 import com.kingcontaria.fastquit.util.SaveManager;

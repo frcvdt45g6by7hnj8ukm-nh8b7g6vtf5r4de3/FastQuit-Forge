@@ -1,6 +1,5 @@
 package com.kingcontaria.fastquit.mixin;
 
-import com.kingcontaria.fastquit.FastQuit;
 import com.kingcontaria.fastquit.util.SaveManager;
 import com.mojang.realmsclient.gui.screens.RealmsUploadScreen;
 import org.spongepowered.asm.mixin.Mixin;

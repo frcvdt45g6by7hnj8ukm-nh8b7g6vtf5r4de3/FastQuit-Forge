@@ -1,6 +1,5 @@
 package com.kingcontaria.fastquit.mixin;
 
-import com.kingcontaria.fastquit.FastQuit;
 import com.kingcontaria.fastquit.util.SaveManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;

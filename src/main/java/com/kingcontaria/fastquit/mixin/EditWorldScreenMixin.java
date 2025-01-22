@@ -12,9 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(EditWorldScreen.class)
 public abstract class EditWorldScreenMixin {
-
     @Shadow @Final private LevelStorageSource.LevelStorageAccess levelAccess;
-
     @Inject(method = {"lambda$init$8(Lnet/minecraft/client/gui/components/Button;)V", "lambda$init$5(Lnet/minecraft/client/gui/components/Button;)V"}, at = @At(value = "HEAD"), cancellable = true)
     private void fastquit$waitForSaveOnBackup(CallbackInfo ci) {
         SaveManager.getSavingWorld(this.levelAccess).ifPresent(server -> SaveManager.wait(server, ci));

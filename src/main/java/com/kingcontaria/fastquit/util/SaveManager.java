@@ -1,6 +1,5 @@
 package com.kingcontaria.fastquit.util;
 
-import com.kingcontaria.fastquit.FastQuit;
 import com.kingcontaria.fastquit.config.ModConfigManager;
 import com.kingcontaria.fastquit.mixin.accessor.LevelStorageSessionAccessor;
 import com.kingcontaria.fastquit.mixin.accessor.MinecraftClientAccessor;
