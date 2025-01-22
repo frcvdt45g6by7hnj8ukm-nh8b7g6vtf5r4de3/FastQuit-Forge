@@ -1,7 +1,10 @@
 package com.kingcontaria.fastquit.mixin;
 
 import com.kingcontaria.fastquit.FastQuit;
-import com.kingcontaria.fastquit.config.FastQuitConfig;
+import com.kingcontaria.fastquit.config.ModConfig;
+import com.kingcontaria.fastquit.config.ModConfigManager;
+import com.kingcontaria.fastquit.util.ModLogger;
+import com.kingcontaria.fastquit.util.SaveManager;
 import com.kingcontaria.fastquit.util.TextHelper;
 import com.kingcontaria.fastquit.util.WorldInfo;
 import com.llamalad7.mixinextras.injector.WrapWithCondition;
@@ -30,21 +33,21 @@ public abstract class MinecraftServerMixin {
     private void fastquit$finishSaving(CallbackInfo ci) {
         //noinspection ConstantConditions
         if ((Object) this instanceof IntegratedServer server) {
-            WorldInfo info = FastQuit.savingWorlds.remove(server);
+            WorldInfo info = SaveManager.savingWorlds.remove(server);
 
             if (info == null) {
-                FastQuit.warn("\"" + server.getWorldData().getLevelName() + "\" was not registered in currently saving worlds!");
+                ModLogger.warn("\"" + server.getWorldData().getLevelName() + "\" was not registered in currently saving worlds!");
                 return;
             }
 
             MutableComponent description = TextHelper.translatable("fastquit.toast." + (info.deleted ? "deleted" : "description"), server.getWorldData().getLevelName());
-            if (FastQuit.CONFIG.showSavingTime != FastQuitConfig.ShowSavingTime.FALSE && !info.deleted) {
+            if (ModConfigManager.getConfig().showSavingTime != ModConfig.ShowSavingTime.FALSE && !info.deleted) {
                 description.append(" (" + info.getTimeSaving() + ")");
             }
-            if (FastQuit.CONFIG.showToasts) {
+            if (ModConfigManager.getConfig().showToasts) {
                 Minecraft.getInstance().submit(() -> Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastIds.WORLD_BACKUP, TextHelper.translatable("fastquit.toast.title"), description)));
             }
-            FastQuit.log(description.getString());
+            ModLogger.log(description.getString());
         }
     }
 
@@ -67,7 +70,7 @@ public abstract class MinecraftServerMixin {
 
     @Unique
     private boolean isDeleted() {
-        WorldInfo info = FastQuit.savingWorlds.get(this);
+        WorldInfo info = SaveManager.savingWorlds.get(this);
         return info != null && info.deleted;
     }
 }

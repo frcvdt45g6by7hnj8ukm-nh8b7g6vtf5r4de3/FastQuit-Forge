@@ -1,6 +1,7 @@
 package com.kingcontaria.fastquit.mixin;
 
 import com.kingcontaria.fastquit.FastQuit;
+import com.kingcontaria.fastquit.util.SaveManager;
 import com.mojang.realmsclient.gui.screens.RealmsUploadScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -14,6 +15,6 @@ public abstract class RealmsUploadScreenMixin {
 
     @Inject(method = "tarGzipArchive", at = @At("HEAD"))
     private void fastquit$waitForSaveOnRealmsUpload(File pathToDirectoryFile, CallbackInfoReturnable<File> cir) {
-        FastQuit.getSavingWorld(pathToDirectoryFile.toPath()).ifPresent(FastQuit::wait);
+        SaveManager.getSavingWorld(pathToDirectoryFile.toPath()).ifPresent(SaveManager::wait);
     }
 }

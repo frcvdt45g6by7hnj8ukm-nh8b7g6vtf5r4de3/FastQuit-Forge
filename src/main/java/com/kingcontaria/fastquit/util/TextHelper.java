@@ -6,6 +6,7 @@ import net.minecraft.network.chat.MutableComponent;
 
 /**
  * 用于简化移植到旧版Minecraft的工具类。
+ * <p>
  * Utility class for ease of porting to older Minecraft versions.
  */
 public final class TextHelper {

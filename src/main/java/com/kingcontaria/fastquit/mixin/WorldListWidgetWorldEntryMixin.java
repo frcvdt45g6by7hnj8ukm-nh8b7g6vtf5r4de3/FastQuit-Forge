@@ -1,7 +1,9 @@
 package com.kingcontaria.fastquit.mixin;
 
 import com.kingcontaria.fastquit.FastQuit;
-import com.kingcontaria.fastquit.config.FastQuitConfig;
+import com.kingcontaria.fastquit.config.ModConfig;
+import com.kingcontaria.fastquit.config.ModConfigManager;
+import com.kingcontaria.fastquit.util.SaveManager;
 import com.kingcontaria.fastquit.util.WorldInfo;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -27,15 +29,16 @@ public abstract class WorldListWidgetWorldEntryMixin {
 
     @WrapOperation(method = {"editWorld", "recreateWorld"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource;validateAndCreateAccess(Ljava/lang/String;)Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;"))
     private LevelStorageSource.LevelStorageAccess fastquit$editSavingWorld(LevelStorageSource storage, String directoryName, Operation<LevelStorageSource.LevelStorageAccess> original) {
-        return FastQuit.getSession(storage.getBaseDir().resolve(directoryName)).orElseGet(() -> original.call(storage, directoryName));
+        return SaveManager.getSession(storage.getBaseDir().resolve(directoryName)).orElseGet(() -> original.call(storage, directoryName));
     }
 
     @WrapOperation(method = "doDeleteWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource;createAccess(Ljava/lang/String;)Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;"))
     private LevelStorageSource.LevelStorageAccess fastquit$deleteSavingWorld(LevelStorageSource storage, String directoryName, Operation<LevelStorageSource.LevelStorageAccess> original) {
-        return FastQuit.getSession(storage.getBaseDir().resolve(directoryName)).orElseGet(() -> original.call(storage, directoryName));
+        return SaveManager.getSession(storage.getBaseDir().resolve(directoryName)).orElseGet(() -> original.call(storage, directoryName));
     }
 
     // While this should not be needed anymore, I'll leave it in just in case something goes wrong.
+    // 虽然现在不再需要它，但我会保留它以防万一出现问题。
     @Inject(method = "editWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/toasts/SystemToast;onWorldAccessFailure(Lnet/minecraft/client/Minecraft;Ljava/lang/String;)V"))
     private void fastquit$openWorldListWhenFailed(CallbackInfo ci) {
         this.minecraft.setScreen(this.screen);
@@ -43,9 +46,9 @@ public abstract class WorldListWidgetWorldEntryMixin {
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;drawString(Lnet/minecraft/client/gui/Font;Ljava/lang/String;IIIZ)I", ordinal = 0, shift = At.Shift.AFTER))
     private void fastquit$renderSavingTimeOnWorldList(GuiGraphics context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta, CallbackInfo ci) {
-        if (FastQuit.CONFIG.showSavingTime == FastQuitConfig.ShowSavingTime.TRUE) {
-            FastQuit.getSavingWorld(this.minecraft.getLevelSource().getBaseDir().resolve(this.summary.getLevelId())).ifPresent(server -> {
-                WorldInfo info = FastQuit.savingWorlds.get(server);
+        if (ModConfigManager.getConfig().showSavingTime == ModConfig.ShowSavingTime.TRUE) {
+            SaveManager.getSavingWorld(this.minecraft.getLevelSource().getBaseDir().resolve(this.summary.getLevelId())).ifPresent(server -> {
+                WorldInfo info = SaveManager.savingWorlds.get(server);
                 if (info != null) {
                     String time = info.getTimeSaving() + " ⌛";
                     context.drawString(this.minecraft.font, time, x + entryWidth - this.minecraft.font.width(time) - 4, y + 1, -6939106, false);

@@ -1,6 +1,9 @@
 package com.kingcontaria.fastquit.mixin;
 
 import com.kingcontaria.fastquit.FastQuit;
+import com.kingcontaria.fastquit.config.ModConfigManager;
+import com.kingcontaria.fastquit.util.ModLogger;
+import com.kingcontaria.fastquit.util.SaveManager;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
 import org.spongepowered.asm.mixin.Final;
@@ -19,19 +22,19 @@ public abstract class LevelStorageMixin {
 
     @Inject(method = "validateAndCreateAccess", at = @At("HEAD"))
     private void fastquit$waitForSaveOnSessionCreation(String levelName, CallbackInfoReturnable<LevelStorageSource.LevelStorageAccess> cir) {
-        if (!FastQuit.CONFIG.allowMultipleServers()) {
-            FastQuit.wait(FastQuit.savingWorlds.keySet());
+        if (!ModConfigManager.getConfig().allowMultipleServers()) {
+            SaveManager.wait(SaveManager.savingWorlds.keySet());
         }
-        FastQuit.getSavingWorld(this.baseDir.resolve(levelName)).ifPresent(FastQuit::wait);
+        SaveManager.getSavingWorld(this.baseDir.resolve(levelName)).ifPresent(SaveManager::wait);
     }
 
     @Inject(method = "lambda$loadLevelSummaries$2(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelDirectory;)Lnet/minecraft/world/level/storage/LevelSummary;", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"), cancellable = true)
     private void fastquit$addCurrentlySavingLevelsToWorldList(LevelStorageSource.LevelDirectory levelSave, CallbackInfoReturnable<LevelSummary> cir) {
-        FastQuit.getSession(levelSave.path()).ifPresent(session -> {
+        SaveManager.getSession(levelSave.path()).ifPresent(session -> {
             try (session) {
                 cir.setReturnValue(session.getSummary());
             } catch (Exception e) {
-                FastQuit.error("Failed to load level summary from saving server!", e);
+                ModLogger.error("Failed to load level summary from saving server!", e);
             }
         });
     }

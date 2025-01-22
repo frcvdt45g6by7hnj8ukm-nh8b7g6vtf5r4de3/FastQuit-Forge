@@ -1,6 +1,7 @@
 package com.kingcontaria.fastquit.mixin;
 
 import com.kingcontaria.fastquit.FastQuit;
+import com.kingcontaria.fastquit.util.SaveManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.WorldOpenFlows;
@@ -20,7 +21,7 @@ public abstract class IntegratedServerLoaderMixin {
 
     @Inject(method = "doLoadLevel(Lnet/minecraft/client/gui/screens/Screen;Ljava/lang/String;ZZ)V", at = @At("HEAD"), cancellable = true)
     private void fastquit$waitForSaveOnWorldLoad_cancellable(Screen parent, String levelName, boolean safeMode, boolean canShowBackupPrompt, CallbackInfo ci) {
-        FastQuit.getSavingWorld(this.levelSource.getBaseDir().resolve(levelName)).ifPresent(server -> FastQuit.wait(server, ci));
+        SaveManager.getSavingWorld(this.levelSource.getBaseDir().resolve(levelName)).ifPresent(server -> SaveManager.wait(server, ci));
         if (ci.isCancelled()) {
             this.minecraft.setScreen(parent);
         }

@@ -1,6 +1,6 @@
 package com.kingcontaria.fastquit.mixin;
 
-import com.kingcontaria.fastquit.FastQuit;
+import com.kingcontaria.fastquit.util.SaveManager;
 import net.minecraft.client.gui.screens.worldselection.EditWorldScreen;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.asm.mixin.Final;
@@ -17,6 +17,6 @@ public abstract class EditWorldScreenMixin {
 
     @Inject(method = {"lambda$init$8(Lnet/minecraft/client/gui/components/Button;)V", "lambda$init$5(Lnet/minecraft/client/gui/components/Button;)V"}, at = @At(value = "HEAD"), cancellable = true)
     private void fastquit$waitForSaveOnBackup(CallbackInfo ci) {
-        FastQuit.getSavingWorld(this.levelAccess).ifPresent(server -> FastQuit.wait(server, ci));
+        SaveManager.getSavingWorld(this.levelAccess).ifPresent(server -> SaveManager.wait(server, ci));
     }
 }

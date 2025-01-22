@@ -1,6 +1,7 @@
 package com.kingcontaria.fastquit.screen;
 
 import com.kingcontaria.fastquit.FastQuit;
+import com.kingcontaria.fastquit.util.ModLogger;
 import com.kingcontaria.fastquit.util.TextHelper;
 import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
@@ -20,7 +21,7 @@ public class WaitingScreen extends GenericDirtMessageScreen {
     public WaitingScreen(Component text, @Nullable CallbackInfo callbackInfo) {
         super(text);
         if (callbackInfo != null && !callbackInfo.isCancellable()) {
-            FastQuit.warn("Provided CallbackInfo for \"" + callbackInfo.getId() + "\" is not cancellable!");
+            ModLogger.warn("Provided CallbackInfo for \"" + callbackInfo.getId() + "\" is not cancellable!");
             callbackInfo = null;
         }
         this.callbackInfo = callbackInfo;
