@@ -6,7 +6,7 @@ import net.minecraftforge.client.ConfigScreenHandler;
 
 public class ModConfigManager {
     private static final ModConfig CONFIG = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
-    private static final ConfigScreenHandler.ConfigScreenFactory FACTORY = new ConfigScreenHandler.ConfigScreenFactory(ModConfigManager::getConfigScreen);
+    private static final ConfigScreenHandler.ConfigScreenFactory FACTORY = new ConfigScreenHandler.ConfigScreenFactory((minecraft, screen) -> getConfigScreen(screen));
     public static Screen getConfigScreen(Screen parent){
         return AutoConfig.getConfigScreen(ModConfig.class, parent).get();
     }
