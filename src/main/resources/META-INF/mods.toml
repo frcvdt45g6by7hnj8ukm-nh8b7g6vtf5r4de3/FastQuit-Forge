@@ -1,28 +1,28 @@
 modLoader = "javafml"
-loaderVersion = "[44,)"
+loaderVersion = "[43,)"
 license = "MIT"
 [[mods]]
 modId = "fastquit"
 logoFile = "icon.png"
-version = "3.0.1+1.19.3forge"
+version = "3.0.1+1.19.2forge"
 displayName = "FastQuit"
 description = "This mod lets you return to the Title Screen early while your world is still saving in the background."
 authors = "KingContaria, Kaleb Langley"
 [[dependencies.fastquit]]
 modId = "forge"
 mandatory = true
-versionRange = "[44,)"
+versionRange = "[43,)"
 ordering = "NONE"
 side = "BOTH"
 [[dependencies.fastquit]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.19.3,1.19.4)"
+versionRange = "[1.19.2,1.19.3)"
 ordering = "NONE"
 side = "BOTH"
 [[dependencies.fastquit]]
 modId="cloth_config"
 mandatory=true
-versionRange="[9.1.104,)"
+versionRange="[8.3.134,)"
 ordering="NONE"
 side="BOTH"

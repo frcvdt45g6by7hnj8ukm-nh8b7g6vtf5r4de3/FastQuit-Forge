@@ -6,17 +6,13 @@ import com.kingcontaria.fastquit.plugin.annotation.Synchronized;
 import com.kingcontaria.fastquit.util.ModLogger;
 import com.kingcontaria.fastquit.util.SaveManager;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.util.DirectoryLock;
-import net.minecraft.world.level.WorldDataConfiguration;
-import net.minecraft.world.level.dimension.LevelStem;
-import net.minecraft.world.level.levelgen.WorldDimensions;
+import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
 import net.minecraft.world.level.storage.PlayerDataStorage;
@@ -44,10 +40,10 @@ public abstract class LevelStorageSessionMixin {
     @Shadow public abstract @Nullable LevelSummary getSummary();
 
     @Synchronized
-    @Shadow public abstract @Nullable Pair<WorldData, WorldDimensions.Complete> getDataTag(DynamicOps<Tag> ops, WorldDataConfiguration dataConfiguration, Registry<LevelStem> dimensionOptionsRegistry, Lifecycle lifecycle);
+    @Shadow public abstract @Nullable WorldData m_211747_(DynamicOps<Tag> ops, DataPackConfig p_211749_, Lifecycle lifecycle);
 
     @Synchronized
-    @Shadow public abstract @Nullable WorldDataConfiguration getDataConfiguration();
+    @Shadow public abstract @Nullable DataPackConfig m_78309_();
 
     @Synchronized
     @Shadow public abstract void saveDataTag(RegistryAccess registryManager, WorldData saveProperties, @Nullable CompoundTag nbt);

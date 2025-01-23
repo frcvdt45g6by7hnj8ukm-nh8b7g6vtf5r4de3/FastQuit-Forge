@@ -27,8 +27,9 @@ public abstract class LevelStorageMixin {
         SaveManager.getSavingWorld(this.baseDir.resolve(levelName)).ifPresent(SaveManager::wait);
     }
 
-    @Inject(method = "lambda$loadLevelSummaries$2(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelDirectory;)Lnet/minecraft/world/level/storage/LevelSummary;", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"), cancellable = true)
+    @Inject(method = "lambda$loadLevelSummaries$4(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelDirectory;)Lnet/minecraft/world/level/storage/LevelSummary;", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"), cancellable = true, remap = false)
     private void fastquit$addCurrentlySavingLevelsToWorldList(LevelStorageSource.LevelDirectory levelSave, CallbackInfoReturnable<LevelSummary> cir) {
+        ModLogger.log("I am list");
         SaveManager.getSession(levelSave.path()).ifPresent(session -> {
             try (session) {
                 cir.setReturnValue(session.getSummary());
