@@ -1,5 +1,6 @@
 package com.kingcontaria.fastquit.plugin;
 
+import com.kingcontaria.fastquit.plugin.annotation.Synchronized;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;

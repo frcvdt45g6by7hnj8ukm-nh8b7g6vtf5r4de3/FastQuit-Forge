@@ -2,7 +2,7 @@ package com.kingcontaria.fastquit.mixin;
 
 import com.kingcontaria.fastquit.mixin.accessor.LevelInfoAccessor;
 import com.kingcontaria.fastquit.mixin.accessor.LevelPropertiesAccessor;
-import com.kingcontaria.fastquit.plugin.Synchronized;
+import com.kingcontaria.fastquit.plugin.annotation.Synchronized;
 import com.kingcontaria.fastquit.util.ModLogger;
 import com.kingcontaria.fastquit.util.SaveManager;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
