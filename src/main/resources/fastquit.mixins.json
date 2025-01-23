@@ -7,18 +7,19 @@
   "client": [
     "EditWorldScreenMixin",
     "IntegratedServerLoaderMixin",
-    "accessor.LevelInfoAccessor",
-    "accessor.LevelPropertiesAccessor",
     "LevelStorageMixin",
-    "accessor.LevelStorageSessionAccessor",
     "LevelStorageSessionMixin",
-    "accessor.MinecraftClientAccessor",
     "MinecraftClientMixin",
-    "accessor.MinecraftServerAccessor",
     "MinecraftServerMixin",
     "OptimizeWorldScreenMixin",
     "RealmsUploadScreenMixin",
-    "WorldListWidgetWorldEntryMixin"
+    "WorldListWidgetWorldEntryMixin",
+    "accessor.EditWorldScreenAccessor",
+    "accessor.LevelInfoAccessor",
+    "accessor.LevelPropertiesAccessor",
+    "accessor.LevelStorageSessionAccessor",
+    "accessor.MinecraftClientAccessor",
+    "accessor.MinecraftServerAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -30,13 +30,13 @@ public class WaitingScreen extends GenericDirtMessageScreen {
     @Override
     public void init() {
         if (this.callbackInfo != null) {
-            this.addRenderableWidget(Button.builder(TextHelper.BACK, button -> this.onClose()).bounds(this.width - 100 - 5, this.height - 20 - 5, 100, 20).build());
+            this.addRenderableWidget(new Button(this.width - 100 - 5, this.height - 20 - 5, 100, 20, TextHelper.BACK, button -> this.onClose()));
         }
     }
 
     @Override
-    public void m_86412_(@NotNull PoseStack context, int mouseX, int mouseY, float delta) {
-        super.m_86412_(context, mouseX, mouseY, delta);
+    public void m_6305_(@NotNull PoseStack context, int mouseX, int mouseY, float delta) {
+        super.m_6305_(context, mouseX, mouseY, delta);
         String loading = LoadingDotsText.get(Util.getMillis());
         this.minecraft.font.m_92883_(context, loading, (float) (this.width - this.minecraft.font.width(loading)) / 2, 95, 0x808080);
     }

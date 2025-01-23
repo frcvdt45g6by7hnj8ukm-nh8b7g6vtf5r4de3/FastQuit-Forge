@@ -16,7 +16,6 @@ public abstract class OptimizeWorldScreenMixin {
 
     // this now acts as a fallback in case the method gets called from somewhere else than EditWorldScreen
     // 现在它充当回退机制，以防方法从 EditWorldScreen 以外的地方被调用。
-
     @Inject(method = "create", at = @At("HEAD"))
     private static void fastquit$waitForSaveOnOptimizeWorld(Minecraft client, BooleanConsumer callback, DataFixer dataFixer, LevelStorageSource.LevelStorageAccess session, boolean eraseCache, CallbackInfoReturnable<OptimizeWorldScreen> cir) {
         SaveManager.getSavingWorld(session).ifPresent(SaveManager::wait);
