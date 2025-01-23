@@ -6,8 +6,8 @@ import com.kingcontaria.fastquit.util.SaveManager;
 import com.kingcontaria.fastquit.util.WorldInfo;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldSelectionList;
 import net.minecraft.world.level.storage.LevelStorageSource;
@@ -26,7 +26,7 @@ public abstract class WorldListWidgetWorldEntryMixin {
     @Shadow @Final private Minecraft minecraft;
     @Shadow @Final private LevelSummary summary;
 
-    @WrapOperation(method = {"editWorld", "recreateWorld"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource;validateAndCreateAccess(Ljava/lang/String;)Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;"))
+    @WrapOperation(method = {"editWorld", "recreateWorld"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource;createAccess(Ljava/lang/String;)Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;"))
     private LevelStorageSource.LevelStorageAccess fastquit$editSavingWorld(LevelStorageSource storage, String directoryName, Operation<LevelStorageSource.LevelStorageAccess> original) {
         return SaveManager.getSession(storage.getBaseDir().resolve(directoryName)).orElseGet(() -> original.call(storage, directoryName));
     }
@@ -43,14 +43,14 @@ public abstract class WorldListWidgetWorldEntryMixin {
         this.minecraft.setScreen(this.screen);
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;drawString(Lnet/minecraft/client/gui/Font;Ljava/lang/String;IIIZ)I", ordinal = 0, shift = At.Shift.AFTER))
-    private void fastquit$renderSavingTimeOnWorldList(GuiGraphics context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta, CallbackInfo ci) {
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Font;m_92883_(Lcom/mojang/blaze3d/vertex/PoseStack;Ljava/lang/String;FFI)I", ordinal = 0, shift = At.Shift.AFTER))
+    private void fastquit$renderSavingTimeOnWorldList(PoseStack context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta, CallbackInfo ci) {
         if (ModConfigManager.getConfig().showSavingTime == ModConfig.ShowSavingTime.TRUE) {
             SaveManager.getSavingWorld(this.minecraft.getLevelSource().getBaseDir().resolve(this.summary.getLevelId())).ifPresent(server -> {
                 WorldInfo info = SaveManager.savingWorlds.get(server);
                 if (info != null) {
                     String time = info.getTimeSaving() + " ⌛";
-                    context.drawString(this.minecraft.font, time, x + entryWidth - this.minecraft.font.width(time) - 4, y + 1, -6939106, false);
+                    this.minecraft.font.m_92883_(context, time, x + entryWidth - this.minecraft.font.width(time) - 4, y + 1, -6939106);
                 }
             });
         }

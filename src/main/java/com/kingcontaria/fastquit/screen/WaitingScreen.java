@@ -2,12 +2,13 @@ package com.kingcontaria.fastquit.screen;
 
 import com.kingcontaria.fastquit.util.ModLogger;
 import com.kingcontaria.fastquit.util.TextHelper;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.Util;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.LoadingDotsText;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -34,10 +35,10 @@ public class WaitingScreen extends GenericDirtMessageScreen {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
+    public void m_86412_(@NotNull PoseStack context, int mouseX, int mouseY, float delta) {
+        super.m_86412_(context, mouseX, mouseY, delta);
         String loading = LoadingDotsText.get(Util.getMillis());
-        context.drawString(Objects.requireNonNull(this.minecraft).font, loading, (this.width - this.minecraft.font.width(loading)) / 2, 95, 0x808080, false);
+        this.minecraft.font.m_92883_(context, loading, (float) (this.width - this.minecraft.font.width(loading)) / 2, 95, 0x808080);
     }
 
     @Override

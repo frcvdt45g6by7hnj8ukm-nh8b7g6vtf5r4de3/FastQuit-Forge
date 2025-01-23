@@ -19,7 +19,7 @@ public abstract class LevelStorageMixin {
 
     @Shadow @Final private Path baseDir;
 
-    @Inject(method = "validateAndCreateAccess", at = @At("HEAD"))
+    @Inject(method = "createAccess", at = @At("HEAD"))
     private void fastquit$waitForSaveOnSessionCreation(String levelName, CallbackInfoReturnable<LevelStorageSource.LevelStorageAccess> cir) {
         if (!ModConfigManager.getConfig().allowMultipleServers()) {
             SaveManager.wait(SaveManager.savingWorlds.keySet());
