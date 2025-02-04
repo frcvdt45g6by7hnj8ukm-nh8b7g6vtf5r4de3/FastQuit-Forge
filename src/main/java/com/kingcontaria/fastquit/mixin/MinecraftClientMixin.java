@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Minecraft.class)
 public abstract class MinecraftClientMixin {
 
-    @Redirect(method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/server/IntegratedServer;isShutdown()Z"))
+    @Redirect(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/server/IntegratedServer;isShutdown()Z"))
     private boolean fastquit(IntegratedServer server) {
         SaveManager.savingWorlds.put(server, new WorldInfo());
 
@@ -36,7 +36,7 @@ public abstract class MinecraftClientMixin {
         return ModConfigManager.getConfig().renderSavingScreen || !(screen instanceof GenericDirtMessageScreen && screen.getTitle().equals(TextHelper.translatable("menu.savingLevel")));
     }
 
-    @Inject(method = "destroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;clearLevel()V", shift = At.Shift.AFTER))
+    @Inject(method = "destroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;disconnect()V", shift = At.Shift.AFTER))
     private void fastquit$waitForSaveOnShutdown(CallbackInfo ci) {
         SaveManager.exit();
     }

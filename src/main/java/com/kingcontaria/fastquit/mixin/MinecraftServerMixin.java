@@ -44,7 +44,7 @@ public abstract class MinecraftServerMixin {
                 description.append(" (" + info.getTimeSaving() + ")");
             }
             if (ModConfigManager.getConfig().showToasts) {
-                Minecraft.getInstance().submit(() -> Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastIds.WORLD_BACKUP, TextHelper.translatable("fastquit.toast.title"), description)));
+                Minecraft.getInstance().submit(() -> Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastId.WORLD_BACKUP, TextHelper.translatable("fastquit.toast.title"), description)));
             }
             ModLogger.log(description.getString());
         }

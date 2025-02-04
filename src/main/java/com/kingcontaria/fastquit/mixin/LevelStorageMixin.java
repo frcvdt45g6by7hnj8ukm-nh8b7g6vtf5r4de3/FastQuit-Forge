@@ -27,11 +27,11 @@ public abstract class LevelStorageMixin {
         SaveManager.getSavingWorld(this.baseDir.resolve(levelName)).ifPresent(SaveManager::wait);
     }
 
-    @Inject(method = "lambda$loadLevelSummaries$2(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelDirectory;)Lnet/minecraft/world/level/storage/LevelSummary;", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"), cancellable = true)
+    @Inject(method = "lambda$loadLevelSummaries$3(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelDirectory;)Lnet/minecraft/world/level/storage/LevelSummary;", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V"), cancellable = true)
     private void fastquit$addCurrentlySavingLevelsToWorldList(LevelStorageSource.LevelDirectory levelSave, CallbackInfoReturnable<LevelSummary> cir) {
         SaveManager.getSession(levelSave.path()).ifPresent(session -> {
             try (session) {
-                cir.setReturnValue(session.getSummary());
+                cir.setReturnValue(session.getSummary(session.getDataTag()));
             } catch (Exception e) {
                 ModLogger.error("Failed to load level summary from saving server!", e);
             }

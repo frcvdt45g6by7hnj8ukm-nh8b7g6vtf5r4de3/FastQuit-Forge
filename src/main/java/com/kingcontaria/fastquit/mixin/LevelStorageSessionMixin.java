@@ -7,6 +7,7 @@ import com.kingcontaria.fastquit.util.ModLogger;
 import com.kingcontaria.fastquit.util.SaveManager;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.Registry;
@@ -41,13 +42,10 @@ public abstract class LevelStorageSessionMixin {
     @Shadow public abstract PlayerDataStorage createPlayerStorage();
 
     @Synchronized
-    @Shadow public abstract @Nullable LevelSummary getSummary();
+    @Shadow public abstract @Nullable LevelSummary getSummary(Dynamic<?> p_310283_);
 
     @Synchronized
-    @Shadow public abstract @Nullable Pair<WorldData, WorldDimensions.Complete> getDataTag(DynamicOps<Tag> ops, WorldDataConfiguration dataConfiguration, Registry<LevelStem> dimensionOptionsRegistry, Lifecycle lifecycle);
-
-    @Synchronized
-    @Shadow public abstract @Nullable WorldDataConfiguration getDataConfiguration();
+    @Shadow protected abstract @Nullable Dynamic<?> getDataTag(boolean p_310699_);
 
     @Synchronized
     @Shadow public abstract void saveDataTag(RegistryAccess registryManager, WorldData saveProperties, @Nullable CompoundTag nbt);
