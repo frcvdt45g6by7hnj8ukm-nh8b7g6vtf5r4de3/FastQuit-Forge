@@ -26,11 +26,11 @@ base {
 }
 
 java {
-	toolchain.languageVersion = JavaLanguageVersion.of(17)
+	toolchain.languageVersion = JavaLanguageVersion.of(21)
 }
 
 minecraft {
-	mappings channel: "official", version: "1.20.4"
+	mappings channel: mapping_channel, version: mapping_version
 	copyIdeResources = true
 
 	runs {
@@ -91,6 +91,9 @@ dependencies {
 	implementation(jarJar("io.github.llamalad7:mixinextras-forge:${mixinextras_version}")) {
 		jarJar.ranged(it, "[${mixinextras_version},)")
 	}
+
+	// Hack fix for now, force jopt-simple to be exactly 5.0.4 because Mojang ships that version, but some transitive dependencies request 6.0+
+	implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
 }
 
 tasks.named('processResources', ProcessResources).configure {

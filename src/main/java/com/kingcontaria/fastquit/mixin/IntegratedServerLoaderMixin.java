@@ -17,7 +17,7 @@ public abstract class IntegratedServerLoaderMixin {
 
     @Shadow @Final private LevelStorageSource levelSource;
 
-    @Inject(method = "checkForBackupAndLoad(Ljava/lang/String;Ljava/lang/Runnable;)V", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "openWorld(Ljava/lang/String;Ljava/lang/Runnable;)V", at = @At("HEAD"), cancellable = true)
     private void fastquit$waitForSaveOnWorldLoad_cancellable(String levelName, Runnable onCancel, CallbackInfo ci) {
         SaveManager.getSavingWorld(this.levelSource.getBaseDir().resolve(levelName)).ifPresent(server -> SaveManager.wait(server, ci));
         if (ci.isCancelled()) {
