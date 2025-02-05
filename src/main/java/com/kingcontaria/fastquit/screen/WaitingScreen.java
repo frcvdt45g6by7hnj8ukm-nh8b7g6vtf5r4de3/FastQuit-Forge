@@ -5,7 +5,7 @@ import com.kingcontaria.fastquit.util.TextHelper;
 import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
+import net.minecraft.client.gui.screens.GenericMessageScreen;
 import net.minecraft.client.gui.screens.LoadingDotsText;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Objects;
 
-public class WaitingScreen extends GenericDirtMessageScreen {
+public class WaitingScreen extends GenericMessageScreen {
 
     private final CallbackInfo callbackInfo;
 
