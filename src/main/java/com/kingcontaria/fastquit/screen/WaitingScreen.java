@@ -8,6 +8,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.GenericMessageScreen;
 import net.minecraft.client.gui.screens.LoadingDotsText;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -34,9 +35,10 @@ public class WaitingScreen extends GenericMessageScreen {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void render(@NotNull GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
         String loading = LoadingDotsText.get(Util.getMillis());
+        context.drawCenteredString(this.font, this.title, this.width / 2, 70, 16777215);
         context.drawString(Objects.requireNonNull(this.minecraft).font, loading, (this.width - this.minecraft.font.width(loading)) / 2, 95, 0x808080, false);
     }
 
