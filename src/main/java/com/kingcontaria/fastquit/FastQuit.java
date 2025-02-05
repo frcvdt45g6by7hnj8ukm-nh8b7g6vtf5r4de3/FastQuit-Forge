@@ -5,8 +5,8 @@ import com.kingcontaria.fastquit.config.ModConfigManager;
 import com.kingcontaria.fastquit.util.ModLogger;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.Toml4jConfigSerializer;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.common.Mod;
 
 @Mod("fastquit")
 public final class FastQuit {
