@@ -17,7 +17,7 @@ side = "BOTH"
 [[dependencies.fastquit]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.19.2,1.19.3)"
+versionRange = "[1.19.1,1.19.3)"
 ordering = "NONE"
 side = "BOTH"
 [[dependencies.fastquit]]
