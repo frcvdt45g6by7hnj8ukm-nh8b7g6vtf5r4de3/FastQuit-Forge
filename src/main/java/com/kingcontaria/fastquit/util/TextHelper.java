@@ -1,8 +1,6 @@
 package com.kingcontaria.fastquit.util;
 
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.*;
 
 /**
  * 用于简化移植到旧版Minecraft的工具类。
@@ -15,10 +13,10 @@ public final class TextHelper {
     public static final Component BACK = CommonComponents.GUI_BACK;
 
     public static MutableComponent translatable(String key, Object... args) {
-        return Component.translatable(key, args);
+        return new TranslatableComponent(key, args);
     }
 
     public static MutableComponent literal(String string) {
-        return Component.literal(string);
+        return new TextComponent(string);
     }
 }

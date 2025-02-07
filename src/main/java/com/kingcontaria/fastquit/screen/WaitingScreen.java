@@ -6,16 +6,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.Util;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
-import net.minecraft.client.gui.screens.LoadingDotsText;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Objects;
-
 public class WaitingScreen extends GenericDirtMessageScreen {
-
+    private static final String[] FRAMES = new String[]{"O o o", "o O o", "o o O", "o O o"};
     private final CallbackInfo callbackInfo;
 
     public WaitingScreen(Component text, @Nullable CallbackInfo callbackInfo) {
@@ -35,10 +32,11 @@ public class WaitingScreen extends GenericDirtMessageScreen {
     }
 
     @Override
-    public void m_6305_(@NotNull PoseStack context, int mouseX, int mouseY, float delta) {
-        super.m_6305_(context, mouseX, mouseY, delta);
-        String loading = LoadingDotsText.get(Util.getMillis());
-        this.minecraft.font.m_92883_(context, loading, (float) (this.width - this.minecraft.font.width(loading)) / 2, 95, 0x808080);
+    public void render(@NotNull PoseStack context, int mouseX, int mouseY, float delta) {
+        super.render(context, mouseX, mouseY, delta);
+        int num = (int)(Util.getMillis() / 300L % (long)FRAMES.length);
+        String loading = FRAMES[num];
+        this.minecraft.font.draw(context, loading, (float) (this.width - this.minecraft.font.width(loading)) / 2, 95, 0x808080);
     }
 
     @Override

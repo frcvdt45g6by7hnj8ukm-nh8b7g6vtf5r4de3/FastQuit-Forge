@@ -40,10 +40,11 @@ public abstract class LevelStorageSessionMixin {
     @Shadow public abstract @Nullable LevelSummary getSummary();
 
     @Synchronized
-    @Shadow public abstract @Nullable WorldData m_211747_(DynamicOps<Tag> ops, DataPackConfig p_211749_, Lifecycle lifecycle);
-
+    @Shadow public abstract @Nullable WorldData getDataTag(DynamicOps<Tag> ops, DataPackConfig p_211749_, Lifecycle lifecycle);
     @Synchronized
-    @Shadow public abstract @Nullable DataPackConfig m_78309_();
+    @Shadow public abstract void readAdditionalLevelSaveData();
+    @Synchronized
+    @Shadow public abstract @Nullable DataPackConfig getDataPacks();
 
     @Synchronized
     @Shadow public abstract void saveDataTag(RegistryAccess registryManager, WorldData saveProperties, @Nullable CompoundTag nbt);

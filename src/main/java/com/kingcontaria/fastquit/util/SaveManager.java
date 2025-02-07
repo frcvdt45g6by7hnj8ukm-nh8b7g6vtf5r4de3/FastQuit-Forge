@@ -142,7 +142,7 @@ public class SaveManager {
      * 可选地返回与给定 {@link Path} 匹配的当前 {@link IntegratedServer}。
      */
     public static Optional<IntegratedServer> getSavingWorld(Path path) {
-        return savingWorlds.keySet().stream().filter(server -> ((LevelStorageSessionAccessor) ((MinecraftServerAccessor) server).fastquit$getSession()).fastquit$getDirectory().path().equals(path)).findFirst();
+        return savingWorlds.keySet().stream().filter(server -> ((LevelStorageSessionAccessor) ((MinecraftServerAccessor) server).fastquit$getSession()).fastquit$getDirectory().equals(path)).findFirst();
     }
 
     /**
