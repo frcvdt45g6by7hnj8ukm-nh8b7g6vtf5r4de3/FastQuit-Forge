@@ -17,9 +17,7 @@ import java.nio.file.Path;
 @Mixin(LevelStorageSource.class)
 public abstract class LevelStorageMixin {
 
-    @Shadow
-    @Final
-    private Path baseDir;
+    @Shadow @Final private Path baseDir;
 
     @Inject(method = "createAccess", at = @At("HEAD"))
     private void fastquit$waitForSaveOnSessionCreation(String levelName, CallbackInfoReturnable<LevelStorageSource.LevelStorageAccess> cir) {

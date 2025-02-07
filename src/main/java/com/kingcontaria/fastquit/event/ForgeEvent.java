@@ -17,7 +17,6 @@ public class ForgeEvent {
     @SubscribeEvent
     public static void waitForSaveOnOptimize(ScreenEvent.Opening event){
         if (event.getNewScreen() instanceof BackupConfirmScreen && event.getCurrentScreen() instanceof EditWorldScreen editWorldScreen){
-            ModLogger.log("I am optimize");
             EditWorldScreenAccessor accessor = (EditWorldScreenAccessor) editWorldScreen;
             CallbackInfo ci = new CallbackInfo("lambda$init$6", true);
             SaveManager.getSavingWorld(accessor.getLevelAccess()).ifPresent(server -> SaveManager.wait(server, ci));
