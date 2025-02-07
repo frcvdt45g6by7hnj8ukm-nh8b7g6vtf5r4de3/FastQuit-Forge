@@ -31,7 +31,7 @@ java {
 }
 
 minecraft {
-	mappings channel: "official", version: "1.20.1"
+	mappings channel: mapping_channel, version: mapping_version
 	copyIdeResources = true
 
 	runs {
@@ -67,21 +67,6 @@ minecraft {
 		}
 	}
 }
-
-//loom {
-//	//accessWidenerPath = file("src/main/resources/mls.accesswidener")
-//
-//	forge {
-//		//convertAccessWideners = true
-//		//extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
-//
-//		mixinConfigs = [
-//				"fastquit.mixins.json"
-//		]
-//	}
-//
-//	mixin.defaultRefmapName.set("fastquit.refmap.json")
-//}
 
 mixin {
 	add sourceSets.main, "${mod_id}.refmap.json"
