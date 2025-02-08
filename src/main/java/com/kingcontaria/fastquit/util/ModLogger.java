@@ -1,10 +1,20 @@
 package com.kingcontaria.fastquit.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.kingcontaria.fastquit.FastQuit;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ModLogger {
-    private static final Logger LOGGER = LoggerFactory.getLogger("fastquit");
+    private static final Logger LOGGER = LogManager.getLogger(FastQuit.MODID);
+    /**
+     * Logs the given debug message.
+     * <p>
+     * 记录指定的调试信息。
+     */
+    public static void debug(String msg) {
+        LOGGER.debug(msg);
+    }
     /**
      * Logs the given message.
      * <p>

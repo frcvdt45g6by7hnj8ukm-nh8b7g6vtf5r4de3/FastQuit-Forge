@@ -1,7 +1,6 @@
 package com.kingcontaria.fastquit.event;
 
 import com.kingcontaria.fastquit.FastQuit;
-import com.kingcontaria.fastquit.mixin.accessor.EditWorldScreenAccessor;
 import com.kingcontaria.fastquit.util.ModLogger;
 import com.kingcontaria.fastquit.util.SaveManager;
 import net.minecraft.client.Minecraft;

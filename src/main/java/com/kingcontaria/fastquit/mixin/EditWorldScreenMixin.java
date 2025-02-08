@@ -14,7 +14,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(EditWorldScreen.class)
 public abstract class EditWorldScreenMixin {
     @Shadow @Final private SaveFormat.LevelSave levelAccess;
-
     @Inject(method = "lambda$init$5(Lnet/minecraft/client/gui/widget/button/Button;)V", at = @At(value = "HEAD"), cancellable = true)
     private void fastquit$waitForSaveOnOptimize(Button p_214304_1_, CallbackInfo ci) {
 //        ModLogger.log("I am optimize");
