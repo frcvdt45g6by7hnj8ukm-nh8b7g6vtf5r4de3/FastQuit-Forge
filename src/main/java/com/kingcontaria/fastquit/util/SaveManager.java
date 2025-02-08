@@ -6,15 +6,16 @@ import com.kingcontaria.fastquit.mixin.accessor.MinecraftClientAccessor;
 import com.kingcontaria.fastquit.mixin.accessor.MinecraftServerAccessor;
 import com.kingcontaria.fastquit.screen.WaitingScreen;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.server.IntegratedServer;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.storage.LevelStorageSource;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.storage.SaveFormat;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SaveManager {
     /**
@@ -25,11 +26,11 @@ public class SaveManager {
     public static final Map<IntegratedServer, WorldInfo> savingWorlds = Collections.synchronizedMap(new HashMap<>());
 
     /**
-     * Stores {@link LevelStorageSource.LevelStorageAccess}'s used by FastQuit as to only close them if no other process is currently using them.
+     * Stores {@link SaveFormat.LevelSave}'s used by FastQuit as to only close them if no other process is currently using them.
      * <p>
-     * 存储由 FastQuit 使用的 {@link LevelStorageSource.LevelStorageAccess}，以便仅在没有其他进程正在使用它们时关闭。
+     * 存储由 FastQuit 使用的 {@link SaveFormat.LevelSave}，以便仅在没有其他进程正在使用它们时关闭。
      */
-    public static final List<LevelStorageSource.LevelStorageAccess> occupiedSessions = Collections.synchronizedList(new ArrayList<>());
+    public static final List<SaveFormat.LevelSave> occupiedSessions = Collections.synchronizedList(new ArrayList<>());
 
     /**
      * Waits for all {@link IntegratedServer}'s to finish saving, gets called when Minecraft is closed.
@@ -108,7 +109,10 @@ public class SaveManager {
 
         Screen oldScreen = client.screen;
 
-        Component stillSaving = TextHelper.translatable("fastquit.screen.waiting", String.join("\" & \"", servers.stream().map(server -> server.getWorldData().getLevelName()).toList()));
+        ITextComponent stillSaving = TextHelper.translatable(
+                "fastquit.screen.waiting",
+                servers.stream().map(server -> server.getWorldData().getLevelName()).collect(Collectors.joining("\" & \""))
+        );
         ModLogger.log(stillSaving.getString());
 
         servers.forEach(server -> server.getRunningThread().setPriority(Thread.NORM_PRIORITY));
@@ -146,25 +150,25 @@ public class SaveManager {
     }
 
     /**
-     * @return optionally returns the currently saving {@link IntegratedServer} matching the given {@link LevelStorageSource.LevelStorageAccess}
+     * @return optionally returns the currently saving {@link IntegratedServer} matching the given {@link SaveFormat.LevelSave}
      * <p>
-     * 可选地返回当前正在保存的 {@link IntegratedServer}，该服务器与给定的 {@link LevelStorageSource.LevelStorageAccess} 匹配。
+     * 可选地返回当前正在保存的 {@link IntegratedServer}，该服务器与给定的 {@link SaveFormat.LevelSave} 匹配。
      */
-    public static Optional<IntegratedServer> getSavingWorld(LevelStorageSource.LevelStorageAccess session) {
+    public static Optional<IntegratedServer> getSavingWorld(SaveFormat.LevelSave session) {
         return savingWorlds.keySet().stream().filter(server -> ((MinecraftServerAccessor) server).fastquit$getSession() == session).findFirst();
     }
 
     /**
-     * @return optionally returns the {@link LevelStorageSource.LevelStorageAccess} of the currently saving {@link IntegratedServer} matching the given {@link Path}
+     * @return optionally returns the {@link SaveFormat.LevelSave} of the currently saving {@link IntegratedServer} matching the given {@link Path}
      * <p>
-     * 可选地返回与给定 {@link Path} 匹配的当前正在保存的 {@link IntegratedServer} 的 {@link LevelStorageSource.LevelStorageAccess}。
-     * @apiNote Remember to {@link LevelStorageSource.LevelStorageAccess#close() close} the session after using it!
+     * 可选地返回与给定 {@link Path} 匹配的当前正在保存的 {@link IntegratedServer} 的 {@link SaveFormat.LevelSave}。
+     * @apiNote Remember to {@link SaveFormat.LevelSave#close() close} the session after using it!
      * <p>
-     * 使用后记得 {@link LevelStorageSource.LevelStorageAccess#close() 关闭} 会话！
+     * 使用后记得 {@link SaveFormat.LevelSave#close() 关闭} 会话！
      */
-    public static Optional<LevelStorageSource.LevelStorageAccess> getSession(Path path) {
+    public static Optional<SaveFormat.LevelSave> getSession(Path path) {
         return getSavingWorld(path).flatMap(server -> {
-            LevelStorageSource.LevelStorageAccess session;
+            SaveFormat.LevelSave session;
             synchronized (session = ((MinecraftServerAccessor) server).fastquit$getSession()) {
                 if (((LevelStorageSessionAccessor) session).fastquit$getLock().isValid()) {
                     occupiedSessions.add(session);

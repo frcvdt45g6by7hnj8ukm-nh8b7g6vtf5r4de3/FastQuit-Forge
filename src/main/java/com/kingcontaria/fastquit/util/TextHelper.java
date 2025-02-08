@@ -1,6 +1,7 @@
 package com.kingcontaria.fastquit.util;
 
-import net.minecraft.network.chat.*;
+import net.minecraft.client.gui.DialogTexts;
+import net.minecraft.util.text.*;
 
 /**
  * 用于简化移植到旧版Minecraft的工具类。
@@ -9,14 +10,14 @@ import net.minecraft.network.chat.*;
  */
 public final class TextHelper {
 
-    public static final Component OFF = CommonComponents.OPTION_OFF;
-    public static final Component BACK = CommonComponents.GUI_BACK;
+    public static final ITextComponent OFF = DialogTexts.OPTION_OFF;
+    public static final ITextComponent BACK = DialogTexts.GUI_BACK;
 
-    public static MutableComponent translatable(String key, Object... args) {
-        return new TranslatableComponent(key, args);
+    public static ITextComponent translatable(String key, Object... args) {
+        return new TranslationTextComponent(key, args);
     }
 
-    public static MutableComponent literal(String string) {
-        return new TextComponent(string);
+    public static ITextComponent literal(String string) {
+        return ITextComponent.nullToEmpty(string);
     }
 }

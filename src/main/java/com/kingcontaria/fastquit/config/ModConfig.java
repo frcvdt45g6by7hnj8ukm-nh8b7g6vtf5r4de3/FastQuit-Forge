@@ -4,9 +4,8 @@ import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.clothconfig2.gui.entries.SelectionListEntry;
-import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraftforge.fml.ModList;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -77,7 +76,8 @@ public class ModConfig implements ConfigData {
     static {
         // Put all conflicting Mod ID's in this set
         // 将所有冲突的 Mod ID 放入此集合中
-        Set<String> incompatibleModIDs = Set.of("quilt_biome");
+        Set<String> incompatibleModIDs = new HashSet<>();
+        incompatibleModIDs.add("quilt_biome");
 
         for (String modID : incompatibleModIDs) {
             ModList.get().getModContainerById(modID).ifPresent(modContainer -> MODS_THAT_CONFLICT_WITH_MULTIPLE_SERVERS.add(modContainer.getModInfo().getDisplayName()));
@@ -104,7 +104,7 @@ public class ModConfig implements ConfigData {
         TRUE;
 
         @Override
-        public @NotNull String getKey() {
+        public String getKey() {
             if (this == ShowSavingTime.TOAST_ONLY) {
                 return "fastquit.config.general.showSavingTime.toastsOnly";
             }

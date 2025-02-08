@@ -1,16 +1,16 @@
 package com.kingcontaria.fastquit.mixin.accessor;
 
-import net.minecraft.util.DirectoryLock;
-import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.server.SessionLockManager;
+import net.minecraft.world.storage.SaveFormat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.nio.file.Path;
 
-@Mixin(LevelStorageSource.LevelStorageAccess.class)
+@Mixin(SaveFormat.LevelSave.class)
 public interface LevelStorageSessionAccessor {
     @Accessor("lock")
-    DirectoryLock fastquit$getLock();
+    SessionLockManager fastquit$getLock();
 
     @Accessor("levelPath")
     Path fastquit$getDirectory();

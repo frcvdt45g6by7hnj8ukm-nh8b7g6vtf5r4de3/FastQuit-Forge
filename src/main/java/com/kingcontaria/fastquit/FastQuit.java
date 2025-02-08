@@ -5,15 +5,17 @@ import com.kingcontaria.fastquit.config.ModConfigManager;
 import com.kingcontaria.fastquit.util.ModLogger;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.Toml4jConfigSerializer;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod(FastQuit.MODID)
-public final class FastQuit {
+public class FastQuit {
     public static final String MODID = "fastquit";
     public FastQuit() {
+        MinecraftForge.EVENT_BUS.register(this);
         AutoConfig.register(ModConfig.class, Toml4jConfigSerializer::new);
-        ModLoadingContext.get().registerExtensionPoint(ModConfigManager.getConfigFactory().getClass(), ModConfigManager::getConfigFactory);
+//        ModLoadingContext.get().registerExtensionPoint(ModConfigManager.getConfigFactory().getClass(), ModConfigManager::getConfigFactory);
         ModLogger.log("FastQuit Initialized!");
     }
 }
