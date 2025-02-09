@@ -3,6 +3,8 @@ package com.kingcontaria.fastquit.screen;
 import com.kingcontaria.fastquit.util.ModLogger;
 import com.kingcontaria.fastquit.util.TextHelper;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.screen.DirtMessageScreen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.Util;
@@ -10,45 +12,41 @@ import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 
-public class WaitingScreen extends DirtMessageScreen {
+public class WaitingScreen extends GuiScreen {
     private static final String[] FRAMES = new String[]{"O o o", "o O o", "o o O", "o O o"};
     private final CallbackInfo callbackInfo;
+    private final ITextComponent text;
 
     public WaitingScreen(ITextComponent text, @Nullable CallbackInfo callbackInfo) {
-        super(text);
         if (callbackInfo != null && !callbackInfo.isCancellable()) {
             ModLogger.warn("Provided CallbackInfo for \"" + callbackInfo.getId() + "\" is not cancellable!");
             callbackInfo = null;
         }
         this.callbackInfo = callbackInfo;
+        this.text = text;
     }
 
     @Override
-    public void init() {
+    public void initGui() {
         if (this.callbackInfo != null) {
-            this.addButton(new Button(this.width - 100 - 5, this.height - 20 - 5, 100, 20, TextHelper.BACK, button -> this.onClose()));
+            this.buttonList.add(new GuiButton(0,this.width - 100 - 5, this.height - 20 - 5, 100, 20, TextHelper.BACK));
         }
     }
 
     @Override
-    public void render(MatrixStack pMatrixStack, int mouseX, int mouseY, float delta) {
-        super.render(pMatrixStack, mouseX, mouseY, delta);
-        int num = (int)(Util.getMillis() / 300L % (long)FRAMES.length);
+    public void drawScreen(int mouseX, int mouseY, float delta) {
+        this.drawDefaultBackground();
+        int num = (int)(System.currentTimeMillis() / 300L % (long)FRAMES.length);
         String loading = FRAMES[num];
-        this.minecraft.font.draw(pMatrixStack, loading, (float) (this.width - this.minecraft.font.width(loading)) / 2, 95, 0x808080);
+        this.drawCenteredString(this.fontRenderer, this.text.getUnformattedText(), this.width / 2, 90, 16777215);
+        this.drawCenteredString(this.fontRenderer, loading, this.width - this.mc.fontRenderer.getStringWidth(loading) / 2, 110, 0x808080);
+        super.drawScreen(mouseX, mouseY, delta);
     }
 
     @Override
-    public boolean shouldCloseOnEsc() {
-        return this.callbackInfo != null;
-    }
-
-    @Override
-    public void onClose() {
-        super.onClose();
-        if (this.callbackInfo != null) {
-            this.callbackInfo.cancel();
-        }
+    protected void actionPerformed(GuiButton button) {
+        this.mc.displayGuiScreen(null);
     }
 }

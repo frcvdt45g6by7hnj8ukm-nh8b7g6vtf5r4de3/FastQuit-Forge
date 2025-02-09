@@ -6,6 +6,7 @@ import com.kingcontaria.fastquit.util.ModLogger;
 import com.kingcontaria.fastquit.util.SaveManager;
 import com.kingcontaria.fastquit.util.TextHelper;
 import com.kingcontaria.fastquit.util.WorldInfo;
+import com.llamalad7.mixinextras.injector.WrapWithCondition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.toasts.SystemToast;
 import net.minecraft.server.MinecraftServer;
@@ -19,12 +20,12 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin {
+
     @Shadow @Final private static Logger LOGGER;
 
     @Inject(method = "onServerExit", at = @At("RETURN"))
@@ -35,40 +36,40 @@ public abstract class MinecraftServerMixin {
             WorldInfo info = SaveManager.savingWorlds.remove(server);
 
             if (info == null) {
-                ModLogger.warn("\"" + server.getWorldData().getLevelName() + "\" was not registered in currently saving worlds!");
+                ModLogger.warn("\"" + server.getWorldName() + "\" was not registered in currently saving worlds!");
                 return;
             }
 
-            ITextComponent description = TextHelper.translatable("fastquit.toast." + (info.deleted ? "deleted" : "description"), server.getWorldData().getLevelName());
-            if (ModConfigManager.getConfig().showSavingTime != ModConfig.ShowSavingTime.FALSE && !info.deleted) {
-                description.copy().append(" (" + info.getTimeSaving() + ")");
+            ITextComponent description = TextHelper.translatable("fastquit.toast." + (info.deleted ? "deleted" : "description"), server.getWorldName());
+            if (ModConfigManager.getConfig().showSavingTime && !info.deleted) {
+                description.appendText(" (" + info.getTimeSaving() + ")");
             }
             if (ModConfigManager.getConfig().showToasts) {
-                Minecraft.getInstance().submit(() -> Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.Type.WORLD_BACKUP, TextHelper.translatable("fastquit.toast.title"), description)));
+                Minecraft.getMinecraft().addScheduledTask(() -> Minecraft.getMinecraft().getToastGui().add(new SystemToast(SystemToast.Type.NARRATOR_TOGGLE, TextHelper.translatable("fastquit.toast.title"), description)));
             }
-            ModLogger.log(description.getString());
+            ModLogger.log(description.getUnformattedText());
         }
     }
 
-    @Redirect(method = "stopServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;saveAll()V"))
-    private void fastquit$cancelPlayerSavingIfDeleted(PlayerList playerManager) {
-        if (this.fastQuit_Forge$isDeleted()) {
+    @WrapWithCondition(method = "stopServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer$4;saveAllPlayerData()V"))
+    private boolean fastquit$cancelPlayerSavingIfDeleted(PlayerList playerManager) {
+        if (this.isDeleted()) {
             LOGGER.info("Cancelled saving players because level was deleted");
-            return;
+            return false;
         }
-        playerManager.saveAll();
+        return true;
     }
 
     @Inject(method = "saveAllChunks", at = {@At(value = "INVOKE", target = "Ljava/util/Iterator;next()Ljava/lang/Object;"), @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/SaveFormat$LevelSave;saveDataTag(Lnet/minecraft/util/registry/DynamicRegistries;Lnet/minecraft/world/storage/IServerConfiguration;Lnet/minecraft/nbt/CompoundNBT;)V")}, cancellable = true)
     private void fastquit$cancelSavingIfDeleted(CallbackInfoReturnable<Boolean> cir) {
-        if (this.fastQuit_Forge$isDeleted()) {
+        if (this.isDeleted()) {
             LOGGER.info("Cancelled saving worlds because level was deleted");
             cir.setReturnValue(false);
         }
     }
 
     @Unique
-    private boolean fastQuit_Forge$isDeleted() {
+    private boolean isDeleted() {
         WorldInfo info = SaveManager.savingWorlds.get(this);
         return info != null && info.deleted;
     }

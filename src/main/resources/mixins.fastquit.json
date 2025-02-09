@@ -2,7 +2,8 @@
   "required": true,
   "minVersion": "0.8",
   "package": "com.kingcontaria.fastquit.mixin",
-  "refmap": "fastquit.refmap.json",
+  "target": "@env(DEFAULT)",
+  "refmap": "${mixin_refmap}",
   "compatibilityLevel": "JAVA_8",
   "client": [
     "EditWorldScreenMixin",

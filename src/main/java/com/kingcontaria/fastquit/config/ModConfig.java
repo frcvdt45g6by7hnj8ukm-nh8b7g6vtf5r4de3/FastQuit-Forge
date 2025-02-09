@@ -36,7 +36,7 @@ public class ModConfig implements ConfigData {
      */
     @ConfigEntry.Gui.Tooltip
     @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-    public ShowSavingTime showSavingTime = ShowSavingTime.TRUE;
+    public boolean showSavingTime = true;
 
     /**
      * Determines the Thread priority used for {@link IntegratedServer}'s saving in the background.
@@ -95,20 +95,5 @@ public class ModConfig implements ConfigData {
             return false;
         }
         return this.allowMultipleServers;
-    }
-
-
-    public enum ShowSavingTime implements SelectionListEntry.Translatable {
-        FALSE,
-        TOAST_ONLY,
-        TRUE;
-
-        @Override
-        public String getKey() {
-            if (this == ShowSavingTime.TOAST_ONLY) {
-                return "fastquit.config.general.showSavingTime.toastsOnly";
-            }
-            return "text.cloth-config.boolean.value." + (this == ShowSavingTime.TRUE);
-        }
     }
 }

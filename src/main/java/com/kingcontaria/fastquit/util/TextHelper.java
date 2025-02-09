@@ -1,6 +1,6 @@
 package com.kingcontaria.fastquit.util;
 
-import net.minecraft.client.gui.DialogTexts;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.*;
 
 /**
@@ -10,14 +10,10 @@ import net.minecraft.util.text.*;
  */
 public final class TextHelper {
 
-    public static final ITextComponent OFF = DialogTexts.OPTION_OFF;
-    public static final ITextComponent BACK = DialogTexts.GUI_BACK;
+    public static final String OFF = I18n.format("options.off");
+    public static final String BACK = I18n.format("gui.back");
 
     public static ITextComponent translatable(String key, Object... args) {
-        return new TranslationTextComponent(key, args);
-    }
-
-    public static ITextComponent literal(String string) {
-        return ITextComponent.nullToEmpty(string);
+        return new TextComponentTranslation(key, args);
     }
 }

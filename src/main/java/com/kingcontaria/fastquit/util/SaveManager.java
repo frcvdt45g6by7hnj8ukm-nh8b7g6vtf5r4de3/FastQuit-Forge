@@ -6,7 +6,7 @@ import com.kingcontaria.fastquit.mixin.accessor.MinecraftClientAccessor;
 import com.kingcontaria.fastquit.mixin.accessor.MinecraftServerAccessor;
 import com.kingcontaria.fastquit.screen.WaitingScreen;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.storage.SaveFormat;
@@ -96,29 +96,29 @@ public class SaveManager {
             return;
         }
 
-        Minecraft client = Minecraft.getInstance();
+        Minecraft client = Minecraft.getMinecraft();
 
-        if (!client.isSameThread()) {
+        if (!client.isCallingFromMinecraftThread()) {
             if (servers.stream().anyMatch(server -> Thread.currentThread() == server.getRunningThread())) {
                 throw new IllegalStateException("Tried to call FastQuit.wait(...) from one of the servers it's supposed to wait for.");
             }
 
-            client.submit(() -> wait(servers)).join();
+//            client.submit(() -> wait(servers)).join();
             return;
         }
 
-        Screen oldScreen = client.screen;
+        GuiScreen oldScreen = client.currentScreen;
 
         ITextComponent stillSaving = TextHelper.translatable(
                 "fastquit.screen.waiting",
                 servers.stream().map(server -> server.getWorldData().getLevelName()).collect(Collectors.joining("\" & \""))
         );
-        ModLogger.log(stillSaving.getString());
+        ModLogger.log(stillSaving.getFormattedText());
 
         servers.forEach(server -> server.getRunningThread().setPriority(Thread.NORM_PRIORITY));
 
         try {
-            client.setScreen(new WaitingScreen(stillSaving, cancellable));
+            client.displayGuiScreen(new WaitingScreen(stillSaving, cancellable));
 
             while (servers.stream().anyMatch(server -> !server.isShutdown())) {
                 if (cancellable != null && cancellable.isCancelled()) {
@@ -133,9 +133,9 @@ public class SaveManager {
         } finally {
             // compatibility with "WorldGen" mod
             if (oldScreen != null && oldScreen.getClass().getName().equals("caeruleusTait.WorldGen.gui.screens.WGConfigScreen")) {
-                client.screen = oldScreen;
+                client.currentScreen = oldScreen;
             } else {
-                client.forceSetScreen(oldScreen);
+                client.displayGuiScreen(oldScreen);
             }
         }
     }
