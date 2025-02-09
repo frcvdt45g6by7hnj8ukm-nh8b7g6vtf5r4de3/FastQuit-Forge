@@ -1,8 +1,6 @@
 package com.kingcontaria.fastquit.plugin;
 
 import com.kingcontaria.fastquit.plugin.annotation.Synchronized;
-import com.kingcontaria.fastquit.util.ModLogger;
-import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -17,8 +15,6 @@ public class FastQuitMixinConfigPlugin implements IMixinConfigPlugin {
 
     @Override
     public void onLoad(String mixinPackage) {
-        MixinExtrasBootstrap.init();
-        ModLogger.debug("MixinExtra Init!");
     }
 
     @Override

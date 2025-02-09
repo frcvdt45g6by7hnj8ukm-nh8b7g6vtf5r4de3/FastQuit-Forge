@@ -3,7 +3,6 @@ package com.kingcontaria.fastquit.mixin;
 import com.kingcontaria.fastquit.config.ModConfigManager;
 import com.kingcontaria.fastquit.util.ModLogger;
 import com.kingcontaria.fastquit.util.SaveManager;
-import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.world.storage.SaveFormat;
 import net.minecraft.world.storage.WorldSummary;
 import org.spongepowered.asm.mixin.Final;
@@ -12,6 +11,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -32,8 +32,8 @@ public abstract class LevelStorageMixin {
         SaveManager.getSavingWorld(this.baseDir.resolve(pSaveName)).ifPresent(SaveManager::wait);
     }
 
-    @Inject(method = "getLevelList", at = @At(value = "CONSTANT", args = "stringValue=Failed to read {} lock"), cancellable = true)
-    private void fastquit$addCurrentlySavingLevelsToWorldList(CallbackInfoReturnable<List<WorldSummary>> cir, @Local List<WorldSummary> worldSummaries, @Local File file1) {
+    @Inject(method = "getLevelList", at = @At(value = "CONSTANT", args = "stringValue=Failed to read {} lock"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
+    private void fastquit$addCurrentlySavingLevelsToWorldList(CallbackInfoReturnable<List<WorldSummary>> cir, List<WorldSummary> worldSummaries, File[] afile, File[] var3, int var4, int var5, File file1) {
         SaveManager.getSession(file1.toPath()).ifPresent(session -> {
             try {
                 worldSummaries.add(session.getSummary());

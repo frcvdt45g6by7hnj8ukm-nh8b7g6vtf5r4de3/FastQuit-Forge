@@ -79,7 +79,7 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    shadow(annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.6"))
+//    shadow(annotationProcessor("io.github.llamalad7:mixinextras-common:0.3.6"))
     implementation("me.shedaniel.cloth:cloth-config-forge:${project.cloth_config_version}")
 //    implementation(jarJar("io.github.llamalad7:mixinextras-common:${project.mixinextras_version}")) {
 //        jarJar.ranged(it, "[${project.mixinextras_version},)")
@@ -88,11 +88,11 @@ dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
-shadowJar {
-    configurations = [project.configurations.shadow]
-    relocate("com.llamalad7.mixinextras", "com.kingcontaria.fastquit.mixinextras")
-    mergeServiceFiles() // Very important!
-}
+//shadowJar {
+//    configurations = [project.configurations.shadow]
+//    relocate("com.llamalad7.mixinextras", "com.llamalad7.mixinextras")
+//    mergeServiceFiles() // Very important!
+//}
 
 tasks.named('processResources', ProcessResources).configure {
     var replaceProperties = [minecraft_version   : minecraft_version, minecraft_version_range: minecraft_version_range,

@@ -6,7 +6,6 @@ import com.kingcontaria.fastquit.util.ModLogger;
 import com.kingcontaria.fastquit.util.SaveManager;
 import com.kingcontaria.fastquit.util.TextHelper;
 import com.kingcontaria.fastquit.util.WorldInfo;
-import com.llamalad7.mixinextras.injector.WrapWithCondition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.toasts.SystemToast;
 import net.minecraft.server.MinecraftServer;
@@ -20,6 +19,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -50,25 +50,25 @@ public abstract class MinecraftServerMixin {
         }
     }
 
-    @WrapWithCondition(method = "stopServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;saveAll()V"))
-    private boolean fastquit$cancelPlayerSavingIfDeleted(PlayerList playerManager) {
-        if (this.isDeleted()) {
+    @Redirect(method = "stopServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;saveAll()V"))
+    private void fastquit$cancelPlayerSavingIfDeleted(PlayerList playerManager) {
+        if (this.fastQuit_Forge$isDeleted()) {
             LOGGER.info("Cancelled saving players because level was deleted");
-            return false;
+            return;
         }
-        return true;
+        playerManager.saveAll();
     }
 
     @Inject(method = "saveAllChunks", at = {@At(value = "INVOKE", target = "Ljava/util/Iterator;next()Ljava/lang/Object;"), @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/SaveFormat$LevelSave;saveDataTag(Lnet/minecraft/util/registry/DynamicRegistries;Lnet/minecraft/world/storage/IServerConfiguration;Lnet/minecraft/nbt/CompoundNBT;)V")}, cancellable = true)
     private void fastquit$cancelSavingIfDeleted(CallbackInfoReturnable<Boolean> cir) {
-        if (this.isDeleted()) {
+        if (this.fastQuit_Forge$isDeleted()) {
             LOGGER.info("Cancelled saving worlds because level was deleted");
             cir.setReturnValue(false);
         }
     }
 
     @Unique
-    private boolean isDeleted() {
+    private boolean fastQuit_Forge$isDeleted() {
         WorldInfo info = SaveManager.savingWorlds.get(this);
         return info != null && info.deleted;
     }
