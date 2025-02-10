@@ -7,9 +7,10 @@ import com.kingcontaria.fastquit.mixin.accessor.MinecraftServerAccessor;
 import com.kingcontaria.fastquit.screen.WaitingScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.storage.SaveFormat;
+import net.minecraft.world.storage.ISaveFormat;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
@@ -26,11 +27,11 @@ public class SaveManager {
     public static final Map<IntegratedServer, WorldInfo> savingWorlds = Collections.synchronizedMap(new HashMap<>());
 
     /**
-     * Stores {@link SaveFormat.LevelSave}'s used by FastQuit as to only close them if no other process is currently using them.
+     * Stores {@link ISaveFormat}'s used by FastQuit as to only close them if no other process is currently using them.
      * <p>
-     * 存储由 FastQuit 使用的 {@link SaveFormat.LevelSave}，以便仅在没有其他进程正在使用它们时关闭。
+     * 存储由 FastQuit 使用的 {@link ISaveFormat}，以便仅在没有其他进程正在使用它们时关闭。
      */
-    public static final List<SaveFormat.LevelSave> occupiedSessions = Collections.synchronizedList(new ArrayList<>());
+    public static final List<ISaveFormat> occupiedSessions = Collections.synchronizedList(new ArrayList<>());
 
     /**
      * Waits for all {@link IntegratedServer}'s to finish saving, gets called when Minecraft is closed.
@@ -49,9 +50,9 @@ public class SaveManager {
             ModLogger.error("Something went horribly wrong when exiting FastQuit!", throwable);
             savingWorlds.forEach((server, info) -> {
                 try {
-                    server.getRunningThread().join();
+                    server.getServerThread().join();
                 } catch (Throwable throwable2) {
-                    ModLogger.error("Failed to wait for \"" + server.getWorldData().getLevelName() + "\"", throwable2);
+                    ModLogger.error("Failed to wait for \"" + server.getWorldName() + "\"", throwable2);
                 }
             });
         }
@@ -99,11 +100,11 @@ public class SaveManager {
         Minecraft client = Minecraft.getMinecraft();
 
         if (!client.isCallingFromMinecraftThread()) {
-            if (servers.stream().anyMatch(server -> Thread.currentThread() == server.getRunningThread())) {
+            if (servers.stream().anyMatch(MinecraftServer::isCallingFromMinecraftThread)) {
                 throw new IllegalStateException("Tried to call FastQuit.wait(...) from one of the servers it's supposed to wait for.");
             }
 
-//            client.submit(() -> wait(servers)).join();
+            client.addScheduledTask(() -> wait(servers));
             return;
         }
 
@@ -111,24 +112,24 @@ public class SaveManager {
 
         ITextComponent stillSaving = TextHelper.translatable(
                 "fastquit.screen.waiting",
-                servers.stream().map(server -> server.getWorldData().getLevelName()).collect(Collectors.joining("\" & \""))
+                servers.stream().map(MinecraftServer::getWorldName).collect(Collectors.joining("\" & \""))
         );
         ModLogger.log(stillSaving.getFormattedText());
 
-        servers.forEach(server -> server.getRunningThread().setPriority(Thread.NORM_PRIORITY));
+        servers.forEach(server -> server.getServerThread().setPriority(Thread.NORM_PRIORITY));
 
         try {
             client.displayGuiScreen(new WaitingScreen(stillSaving, cancellable));
 
-            while (servers.stream().anyMatch(server -> !server.isShutdown())) {
+            while (servers.stream().anyMatch(server -> !server.getServerThread().isAlive())) {
                 if (cancellable != null && cancellable.isCancelled()) {
                     if (ModConfigManager.getConfig().backgroundPriority != 0) {
-                        servers.forEach(server -> server.getRunningThread().setPriority(ModConfigManager.getConfig().backgroundPriority));
+                        servers.forEach(server -> server.getServerThread().setPriority(ModConfigManager.getConfig().backgroundPriority));
                     }
                     ModLogger.log("Cancelled waiting for currently saving worlds.");
                     break;
                 }
-                ((MinecraftClientAccessor) client).fastquit$render(false);
+                ((MinecraftClientAccessor) client).fastquit$render();
             }
         } finally {
             // compatibility with "WorldGen" mod
@@ -150,25 +151,22 @@ public class SaveManager {
     }
 
     /**
-     * @return optionally returns the currently saving {@link IntegratedServer} matching the given {@link SaveFormat.LevelSave}
+     * @return optionally returns the currently saving {@link IntegratedServer} matching the given {@link ISaveFormat}
      * <p>
-     * 可选地返回当前正在保存的 {@link IntegratedServer}，该服务器与给定的 {@link SaveFormat.LevelSave} 匹配。
+     * 可选地返回当前正在保存的 {@link IntegratedServer}，该服务器与给定的 {@link ISaveFormat} 匹配。
      */
-    public static Optional<IntegratedServer> getSavingWorld(SaveFormat.LevelSave session) {
+    public static Optional<IntegratedServer> getSavingWorld(ISaveFormat session) {
         return savingWorlds.keySet().stream().filter(server -> ((MinecraftServerAccessor) server).fastquit$getSession() == session).findFirst();
     }
 
     /**
-     * @return optionally returns the {@link SaveFormat.LevelSave} of the currently saving {@link IntegratedServer} matching the given {@link Path}
+     * @return optionally returns the {@link ISaveFormat} of the currently saving {@link IntegratedServer} matching the given {@link Path}
      * <p>
-     * 可选地返回与给定 {@link Path} 匹配的当前正在保存的 {@link IntegratedServer} 的 {@link SaveFormat.LevelSave}。
-     * @apiNote Remember to {@link SaveFormat.LevelSave#close() close} the session after using it!
-     * <p>
-     * 使用后记得 {@link SaveFormat.LevelSave#close() 关闭} 会话！
+     * 可选地返回与给定 {@link Path} 匹配的当前正在保存的 {@link IntegratedServer} 的 {@link ISaveFormat}。
      */
-    public static Optional<SaveFormat.LevelSave> getSession(Path path) {
+    public static Optional<ISaveFormat> getSession(Path path) {
         return getSavingWorld(path).flatMap(server -> {
-            SaveFormat.LevelSave session;
+            ISaveFormat session;
             synchronized (session = ((MinecraftServerAccessor) server).fastquit$getSession()) {
                 if (((LevelStorageSessionAccessor) session).fastquit$getLock().isValid()) {
                     occupiedSessions.add(session);

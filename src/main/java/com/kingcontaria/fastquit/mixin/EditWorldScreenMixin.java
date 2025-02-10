@@ -1,6 +1,7 @@
 package com.kingcontaria.fastquit.mixin;
 
 import com.kingcontaria.fastquit.util.SaveManager;
+import net.minecraft.client.gui.GuiWorldEdit;
 import net.minecraft.client.gui.screen.EditWorldScreen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.world.storage.SaveFormat;
@@ -11,14 +12,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(EditWorldScreen.class)
+@Mixin(GuiWorldEdit.class)
 public abstract class EditWorldScreenMixin {
-    @Shadow @Final private SaveFormat.LevelSave levelAccess;
-    @Inject(method = "lambda$init$5(Lnet/minecraft/client/gui/widget/button/Button;)V", at = @At(value = "HEAD"), cancellable = true)
-    private void fastquit$waitForSaveOnOptimize(Button p_214304_1_, CallbackInfo ci) {
-//        ModLogger.log("I am optimize");
-        SaveManager.getSavingWorld(this.levelAccess).ifPresent(server -> SaveManager.wait(server, ci));
-    }
+//    @Inject(method = "lambda$init$5(Lnet/minecraft/client/gui/widget/button/Button;)V", at = @At(value = "HEAD"), cancellable = true)
+//    private void fastquit$waitForSaveOnOptimize(Button p_214304_1_, CallbackInfo ci) {
+////        ModLogger.log("I am optimize");
+//        SaveManager.getSavingWorld(this.levelAccess).ifPresent(server -> SaveManager.wait(server, ci));
+//    }
 
     @Inject(method = "lambda$init$2(Lnet/minecraft/client/gui/widget/button/Button;)V", at = @At(value = "HEAD"), cancellable = true)
     private void fastquit$waitForSaveOnBackup(Button p_101292_, CallbackInfo ci) {

@@ -12,6 +12,7 @@ import net.minecraft.nbt.INBT;
 import net.minecraft.server.SessionLockManager;
 import net.minecraft.util.datafix.codec.DatapackCodec;
 import net.minecraft.util.registry.DynamicRegistries;
+import net.minecraft.world.storage.ISaveFormat;
 import net.minecraft.world.storage.IServerConfiguration;
 import net.minecraft.world.storage.PlayerData;
 import net.minecraft.world.storage.SaveFormat;
@@ -61,28 +62,28 @@ public abstract class LevelStorageSessionMixin {
 
     @Inject(method = "makeWorldBackup", at = @At("HEAD"))
     private void fastquit$waitForSaveOnBackup(CallbackInfoReturnable<Long> cir) {
-        SaveManager.getSavingWorld((SaveFormat.LevelSave) (Object) this).ifPresent(SaveManager::wait);
+        SaveManager.getSavingWorld((ISaveFormat) (Object) this).ifPresent(SaveManager::wait);
     }
 
     @Inject(method = "renameLevel", at = @At("TAIL"))
     private void fastquit$editSavingWorldName(String name, CallbackInfo ci) {
-        SaveManager.getSavingWorld((SaveFormat.LevelSave) (Object) this).ifPresent(server -> ((LevelInfoAccessor) (Object) ((LevelPropertiesAccessor) server.getWorldData()).fastquit$getLevelInfo()).fastquit$setName(name));
+        SaveManager.getSavingWorld((ISaveFormat) (Object) this).ifPresent(server -> server.setWorldName(name));
     }
 
     @Inject(method = "deleteLevel", at = @At("TAIL"))
     private void fastquit$deleteSavingWorld(CallbackInfo ci) {
-        SaveManager.getSavingWorld((SaveFormat.LevelSave) (Object) this).map(SaveManager.savingWorlds::get).ifPresent(info -> info.deleted = true);
+        SaveManager.getSavingWorld((ISaveFormat) (Object) this).map(SaveManager.savingWorlds::get).ifPresent(info -> info.deleted = true);
     }
 
     @WrapWithCondition(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/SessionLockManager;close()V"))
     private boolean fastquit$checkSessionClose(SessionLockManager instance) {
-        return !SaveManager.occupiedSessions.remove((SaveFormat.LevelSave) (Object) this);
+        return !SaveManager.occupiedSessions.remove((ISaveFormat) (Object) this);
     }
 
     @Inject(method = "checkLock", at = @At("HEAD"))
     private void fastquit$warnIfUnSynchronizedSessionAccess(CallbackInfo ci) {
         if (!Thread.holdsLock(this)) {
-            SaveManager.getSavingWorld((SaveFormat.LevelSave) (Object) this).ifPresent(server -> {
+            SaveManager.getSavingWorld((ISaveFormat) (Object) this).ifPresent(server -> {
                 ModLogger.warn("Un-synchronized access to \"" + this.levelId + "\" session!");
                 if (!server.isSameThread()) {
                     SaveManager.wait(server);
