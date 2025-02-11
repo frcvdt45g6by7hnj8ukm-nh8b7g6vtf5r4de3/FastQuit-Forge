@@ -1,6 +1,7 @@
 package com.kingcontaria.fastquit.mixin;
 
 import com.kingcontaria.fastquit.config.ModConfigManager;
+import com.kingcontaria.fastquit.util.ModLogger;
 import com.kingcontaria.fastquit.util.SaveManager;
 import com.kingcontaria.fastquit.util.WorldInfo;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -20,19 +21,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(GuiListWorldSelectionEntry.class)
 public abstract class WorldListWidgetWorldEntryMixin {
 
-    @Shadow @Final private GuiListWorldSelection containingListSel;
     @Shadow @Final private Minecraft client;
     @Shadow @Final private WorldSummary worldSummary;
 
     @WrapOperation(method = "recreateWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getSaveLoader()Lnet/minecraft/world/storage/ISaveFormat;"))
     private ISaveFormat fastquit$editSavingWorld(Minecraft instance, Operation<ISaveFormat> original) {
-        return SaveManager.getSession(storage.getBaseDir().resolve(directoryName)).orElseGet(() -> original.call(instance));
+        ModLogger.log("FastQuit is me!");
+        return SaveManager.getSession(instance.getSaveLoader().getSaveLoader(this.worldSummary.getFileName(), false).getWorldDirectory().toPath()).orElseGet(() -> original.call(instance));
     }
 
-    @WrapOperation(method = "deleteWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getSaveLoader()Lnet/minecraft/world/storage/ISaveFormat;"))
-    private ISaveFormat fastquit$deleteSavingWorld(Minecraft instance, Operation<ISaveFormat> original) {
-        return SaveManager.getSession(storage.getBaseDir().resolve(directoryName)).orElseGet(() -> original.call(storage, directoryName));
-    }
+//    @WrapOperation(method = "a", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getSaveLoader()Lnet/minecraft/world/storage/ISaveFormat;"))
+//    private ISaveFormat fastquit$deleteSavingWorld(Minecraft instance, Operation<ISaveFormat> original) {
+//        instance.gameDir.
+//        return SaveManager.getSession(storage.getBaseDir().resolve(directoryName)).orElseGet(() -> original.call(storage, directoryName));
+//    }
 
     // While this should not be needed anymore, I'll leave it in just in case something goes wrong.
     // 虽然现在不再需要它，但我会保留它以防万一出现问题。
@@ -44,7 +46,7 @@ public abstract class WorldListWidgetWorldEntryMixin {
     @Inject(method = "drawEntry", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/FontRenderer;drawString(Ljava/lang/String;III)I", ordinal = 0, shift = At.Shift.AFTER))
     private void fastquit$renderSavingTimeOnWorldList(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta, CallbackInfo ci) {
         if (ModConfigManager.getConfig().showSavingTime) {
-            SaveManager.getSavingWorld(this.client.getLevelSource().getBaseDir().resolve(this.worldSummary.getLevelId())).ifPresent(server -> {
+            SaveManager.getSavingWorld(this.client.getSaveLoader().getSaveLoader(this.worldSummary.getFileName(), false).getWorldDirectory().toPath()).ifPresent(server -> {
                 WorldInfo info = SaveManager.savingWorlds.get(server);
                 if (info != null) {
                     String time = info.getTimeSaving() + " ⌛";

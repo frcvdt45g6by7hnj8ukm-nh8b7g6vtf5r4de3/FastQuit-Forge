@@ -2,9 +2,6 @@ package com.kingcontaria.fastquit.mixin;
 
 import com.kingcontaria.fastquit.util.SaveManager;
 import net.minecraft.client.gui.GuiWorldEdit;
-import net.minecraft.client.gui.screen.EditWorldScreen;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.world.storage.SaveFormat;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -20,11 +17,11 @@ public abstract class EditWorldScreenMixin {
 //        SaveManager.getSavingWorld(this.levelAccess).ifPresent(server -> SaveManager.wait(server, ci));
 //    }
 
-    @Inject(method = "lambda$init$2(Lnet/minecraft/client/gui/widget/button/Button;)V", at = @At(value = "HEAD"), cancellable = true)
-    private void fastquit$waitForSaveOnBackup(Button p_101292_, CallbackInfo ci) {
-//        ModLogger.log("I am backup");
-        SaveManager.getSavingWorld(this.levelAccess).ifPresent(server -> SaveManager.wait(server, ci));
-    }
+//    @Inject(method = "lambda$init$2(Lnet/minecraft/client/gui/widget/button/Button;)V", at = @At(value = "HEAD"), cancellable = true)
+//    private void fastquit$waitForSaveOnBackup(Button p_101292_, CallbackInfo ci) {
+////        ModLogger.log("I am backup");
+//        SaveManager.getSavingWorld(this.levelAccess).ifPresent(server -> SaveManager.wait(server, ci));
+//    }
 
 //    @Inject(method = "makeBackupAndShowToast(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;)Z", at = @At(value = "HEAD"), cancellable = true)
 //    private static void fastquit$waitForSaveOnBackup(LevelStorageSource.LevelStorageAccess levelAccess, CallbackInfoReturnable<Boolean> ci){

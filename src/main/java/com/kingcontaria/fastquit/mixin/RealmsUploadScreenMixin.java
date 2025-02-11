@@ -12,7 +12,7 @@ import java.io.File;
 @Mixin(RealmsUploadScreen.class)
 public abstract class RealmsUploadScreenMixin {
 
-    @Inject(method = "tarGzipArchive", at = @At("HEAD"))
+    @Inject(method = "tarGzipArchive(Ljava/io/File;)Ljava/io/File;", at = @At("HEAD"), remap = false)
     private void fastquit$waitForSaveOnRealmsUpload(File pathToDirectoryFile, CallbackInfoReturnable<File> cir) {
         SaveManager.getSavingWorld(pathToDirectoryFile.toPath()).ifPresent(SaveManager::wait);
     }

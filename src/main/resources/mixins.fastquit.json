@@ -7,15 +7,12 @@
   "compatibilityLevel": "JAVA_8",
   "client": [
     "EditWorldScreenMixin",
-    "LevelStorageMixin",
-    "LevelStorageSessionMixin",
     "MinecraftClientMixin",
     "MinecraftServerMixin",
-    "OptimizeWorldScreenMixin",
+    "SaveHandlerMixin",
+    "SaveFormatOldMixin",
     "RealmsUploadScreenMixin",
     "WorldListWidgetWorldEntryMixin",
-    "accessor.LevelInfoAccessor",
-    "accessor.LevelPropertiesAccessor",
     "accessor.LevelStorageSessionAccessor",
     "accessor.MinecraftClientAccessor",
     "accessor.MinecraftServerAccessor"

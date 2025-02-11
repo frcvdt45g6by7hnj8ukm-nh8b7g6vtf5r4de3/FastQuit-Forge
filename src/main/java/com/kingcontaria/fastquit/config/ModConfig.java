@@ -1,24 +1,20 @@
 package com.kingcontaria.fastquit.config;
 
-import me.shedaniel.autoconfig.ConfigData;
-import me.shedaniel.autoconfig.annotation.Config;
-import me.shedaniel.autoconfig.annotation.ConfigEntry;
-import me.shedaniel.clothconfig2.gui.entries.SelectionListEntry;
 import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.common.Loader;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
-@Config(name = "fastquit")
-public class ModConfig implements ConfigData {
+public class ModConfig {
 
     /**
      * Determines whether the "Saving world" screen gets rendered.
      * <p>
      * 确定是否渲染“保存世界”界面。
      */
-    @ConfigEntry.Gui.Tooltip
+    
     public boolean renderSavingScreen = false;
 
     /**
@@ -26,7 +22,7 @@ public class ModConfig implements ConfigData {
      * <p>
      * 确定当世界保存完成时是否显示提示框（toast）。
      */
-    @ConfigEntry.Gui.Tooltip
+    
     public boolean showToasts = true;
 
     /**
@@ -34,8 +30,7 @@ public class ModConfig implements ConfigData {
      * <p>
      * 确定是否在提示框（toast）和世界列表中显示保存世界所花费的时间。
      */
-    @ConfigEntry.Gui.Tooltip
-    @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+    
     public boolean showSavingTime = true;
 
     /**
@@ -45,9 +40,6 @@ public class ModConfig implements ConfigData {
      * 确定 {@link IntegratedServer} 后台保存时使用的线程优先级。
      * 值需要在 0 和 10 之间，当值为 0 时，线程优先级保持不变。
      */
-    @ConfigEntry.Category("performance")
-    @ConfigEntry.Gui.Tooltip
-    @ConfigEntry.BoundedDiscrete(max = Thread.MAX_PRIORITY)
     public int backgroundPriority = 2;
 
     /**
@@ -61,8 +53,6 @@ public class ModConfig implements ConfigData {
      * <p>
      * 通过 {@link ModConfig#allowMultipleServers()} 访问，以避免已知的模组冲突！
      */
-    @ConfigEntry.Category("compat")
-    @ConfigEntry.Gui.Tooltip
     private boolean allowMultipleServers = true;
 
     /**
@@ -80,7 +70,7 @@ public class ModConfig implements ConfigData {
         incompatibleModIDs.add("quilt_biome");
 
         for (String modID : incompatibleModIDs) {
-            ModList.get().getModContainerById(modID).ifPresent(modContainer -> MODS_THAT_CONFLICT_WITH_MULTIPLE_SERVERS.add(modContainer.getModInfo().getDisplayName()));
+            Optional.ofNullable(Loader.instance().getIndexedModList().get(modID)).ifPresent(modContainer -> MODS_THAT_CONFLICT_WITH_MULTIPLE_SERVERS.add(modContainer.getName()));
 //            FabricLoader.getInstance().getModContainer(modID).ifPresent(modContainer -> MODS_THAT_CONFLICT_WITH_MULTIPLE_SERVERS.add(modContainer.getMetadata().getName()));
         }
     }

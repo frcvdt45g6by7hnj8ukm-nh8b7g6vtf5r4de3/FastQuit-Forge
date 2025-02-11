@@ -2,17 +2,12 @@ package com.kingcontaria.fastquit.screen;
 
 import com.kingcontaria.fastquit.util.ModLogger;
 import com.kingcontaria.fastquit.util.TextHelper;
-import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.screen.DirtMessageScreen;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 
 public class WaitingScreen extends GuiScreen {
     private static final String[] FRAMES = new String[]{"O o o", "o O o", "o o O", "o O o"};

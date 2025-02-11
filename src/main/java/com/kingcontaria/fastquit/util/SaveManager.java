@@ -11,6 +11,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.storage.ISaveFormat;
+import net.minecraft.world.storage.ISaveHandler;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
@@ -147,11 +148,11 @@ public class SaveManager {
      * 可选地返回与给定 {@link Path} 匹配的当前 {@link IntegratedServer}。
      */
     public static Optional<IntegratedServer> getSavingWorld(Path path) {
-        return savingWorlds.keySet().stream().filter(server -> ((LevelStorageSessionAccessor) ((MinecraftServerAccessor) server).fastquit$getSession()).fastquit$getDirectory().equals(path)).findFirst();
+        return savingWorlds.keySet().stream().filter(server -> ((LevelStorageSessionAccessor) ((MinecraftServerAccessor) server).fastquit$getSession()).fastquit$getDirectory().toPath().equals(path)).findFirst();
     }
 
     /**
-     * @return optionally returns the currently saving {@link IntegratedServer} matching the given {@link ISaveFormat}
+     * @return optionally returns the currently saving {@link IntegratedServer} matching the given {@link ISaveHandler}
      * <p>
      * 可选地返回当前正在保存的 {@link IntegratedServer}，该服务器与给定的 {@link ISaveFormat} 匹配。
      */
@@ -159,6 +160,14 @@ public class SaveManager {
         return savingWorlds.keySet().stream().filter(server -> ((MinecraftServerAccessor) server).fastquit$getSession() == session).findFirst();
     }
 
+    /**
+     * @return optionally returns the currently saving {@link IntegratedServer} matching the given {@link ISaveHandler}
+     * <p>
+     * 可选地返回当前正在保存的 {@link IntegratedServer}，该服务器与给定的 {@link ISaveHandler} 匹配。
+     */
+    public static Optional<IntegratedServer> getSavingWorld(ISaveHandler session, String saveName) {
+        return savingWorlds.keySet().stream().filter(server -> ((MinecraftServerAccessor) server).fastquit$getSession().getSaveLoader(saveName, false) == session).findFirst();
+    }
     /**
      * @return optionally returns the {@link ISaveFormat} of the currently saving {@link IntegratedServer} matching the given {@link Path}
      * <p>
@@ -168,12 +177,12 @@ public class SaveManager {
         return getSavingWorld(path).flatMap(server -> {
             ISaveFormat session;
             synchronized (session = ((MinecraftServerAccessor) server).fastquit$getSession()) {
-                if (((LevelStorageSessionAccessor) session).fastquit$getLock().isValid()) {
+//                if (((LevelStorageSessionAccessor) session).fastquit$getLock().isValid()) {
                     occupiedSessions.add(session);
                     return Optional.of(session);
-                }
+//                }
             }
-            return Optional.empty();
+//            return Optional.empty();
         });
     }
 }
