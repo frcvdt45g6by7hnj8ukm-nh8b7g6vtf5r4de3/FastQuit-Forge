@@ -3,6 +3,7 @@ package com.kingcontaria.fastquit.mixin;
 import com.kingcontaria.fastquit.util.ModLogger;
 import com.kingcontaria.fastquit.util.SaveManager;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.storage.ISaveFormat;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.SaveHandler;
@@ -34,11 +35,11 @@ public class SaveHandlerMixin {
 
     @WrapWithCondition(method = "setSessionLock", at = @At(value = "INVOKE", target = "Ljava/io/DataOutputStream;close()V"))
     private boolean fastquit$checkSessionClose(DataOutputStream instance) {
-        return !SaveManager.occupiedSessions.remove((ISaveFormat) this);
+        return !SaveManager.occupiedSessions.remove(Minecraft.getMinecraft().getSaveLoader());
     }
 
     @WrapWithCondition(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Ljava/io/DataInputStream;close()V"))
     private boolean fastquit$checkSessionClose(DataInputStream instance) {
-        return !SaveManager.occupiedSessions.remove((ISaveFormat) this);
+        return !SaveManager.occupiedSessions.remove(Minecraft.getMinecraft().getSaveLoader());
     }
 }

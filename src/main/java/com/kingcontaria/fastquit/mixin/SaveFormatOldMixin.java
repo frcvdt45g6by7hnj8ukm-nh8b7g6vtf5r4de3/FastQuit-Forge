@@ -1,9 +1,8 @@
 package com.kingcontaria.fastquit.mixin;
 
-import com.kingcontaria.fastquit.config.ModConfigManager;
+import com.kingcontaria.fastquit.config.ModConfig;
 import com.kingcontaria.fastquit.plugin.annotation.Synchronized;
 import com.kingcontaria.fastquit.util.SaveManager;
-import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.storage.*;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -45,7 +44,7 @@ public abstract class SaveFormatOldMixin {
 
     @Inject(method = "getSaveLoader", at = @At("HEAD"))
     public void fastquit$waitForSaveOnSessionCreation(String saveName, boolean storePlayerdata, CallbackInfoReturnable<ISaveHandler> cir){
-        if (!ModConfigManager.getConfig().allowMultipleServers()) {
+        if (!ModConfig.allowMultipleServers()) {
             SaveManager.wait(SaveManager.savingWorlds.keySet());
         }
         SaveManager.getSavingWorld(this.savesDirectory.toPath().resolve(saveName)).ifPresent(SaveManager::wait);

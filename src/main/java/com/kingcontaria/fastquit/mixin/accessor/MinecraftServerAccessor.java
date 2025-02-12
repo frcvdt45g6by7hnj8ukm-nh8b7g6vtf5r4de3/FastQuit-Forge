@@ -7,6 +7,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(MinecraftServer.class)
 public interface MinecraftServerAccessor {
+    @Accessor("serverThread")
+    Thread fastquit$getThread();
     @Accessor("anvilConverterForAnvilFile")
     ISaveFormat fastquit$getSession();
 }

@@ -1,7 +1,8 @@
 package com.kingcontaria.fastquit.util;
 
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.*;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 
 /**
  * 用于简化移植到旧版Minecraft的工具类。

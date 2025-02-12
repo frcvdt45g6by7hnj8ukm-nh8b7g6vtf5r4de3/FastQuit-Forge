@@ -1,11 +1,11 @@
 package com.kingcontaria.fastquit.mixin;
 
-import com.kingcontaria.fastquit.config.ModConfigManager;
+import com.kingcontaria.fastquit.config.ModConfig;
 import com.kingcontaria.fastquit.util.ModLogger;
 import com.kingcontaria.fastquit.util.SaveManager;
 import com.kingcontaria.fastquit.util.TextHelper;
 import com.kingcontaria.fastquit.util.WorldInfo;
-import com.llamalad7.mixinextras.injector.WrapWithCondition;
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.toasts.SystemToast;
 import net.minecraft.server.MinecraftServer;
@@ -39,10 +39,10 @@ public abstract class MinecraftServerMixin {
             }
 
             ITextComponent description = TextHelper.translatable("fastquit.toast." + (info.deleted ? "deleted" : "description"), server.getWorldName());
-            if (ModConfigManager.getConfig().showSavingTime && !info.deleted) {
+            if (ModConfig.showSavingTime && !info.deleted) {
                 description.appendText(" (" + info.getTimeSaving() + ")");
             }
-            if (ModConfigManager.getConfig().showToasts) {
+            if (ModConfig.showToasts) {
                 Minecraft.getMinecraft().addScheduledTask(() -> Minecraft.getMinecraft().getToastGui().add(new SystemToast(SystemToast.Type.NARRATOR_TOGGLE, TextHelper.translatable("fastquit.toast.title"), description)));
             }
             ModLogger.log(description.getUnformattedText());

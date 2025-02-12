@@ -36,7 +36,7 @@ public class WaitingScreen extends GuiScreen {
         int num = (int)(System.currentTimeMillis() / 300L % (long)FRAMES.length);
         String loading = FRAMES[num];
         this.drawCenteredString(this.fontRenderer, this.text.getUnformattedText(), this.width / 2, 90, 16777215);
-        this.drawCenteredString(this.fontRenderer, loading, this.width - this.mc.fontRenderer.getStringWidth(loading) / 2, 110, 0x808080);
+        this.drawCenteredString(this.fontRenderer, loading, this.width / 2, 110, 0x808080);
         super.drawScreen(mouseX, mouseY, delta);
     }
 

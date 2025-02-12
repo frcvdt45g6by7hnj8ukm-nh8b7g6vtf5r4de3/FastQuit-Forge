@@ -1,7 +1,5 @@
 package com.kingcontaria.fastquit.mixin;
 
-import org.spongepowered.asm.mixin.Mixin;
-
 public abstract class LevelStorageSessionMixin {
 
 //    @Shadow @Final private String levelId;

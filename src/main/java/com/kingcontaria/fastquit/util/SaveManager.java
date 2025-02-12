@@ -1,6 +1,6 @@
 package com.kingcontaria.fastquit.util;
 
-import com.kingcontaria.fastquit.config.ModConfigManager;
+import com.kingcontaria.fastquit.config.ModConfig;
 import com.kingcontaria.fastquit.mixin.accessor.LevelStorageSessionAccessor;
 import com.kingcontaria.fastquit.mixin.accessor.MinecraftClientAccessor;
 import com.kingcontaria.fastquit.mixin.accessor.MinecraftServerAccessor;
@@ -124,8 +124,8 @@ public class SaveManager {
 
             while (servers.stream().anyMatch(server -> !server.getServerThread().isAlive())) {
                 if (cancellable != null && cancellable.isCancelled()) {
-                    if (ModConfigManager.getConfig().backgroundPriority != 0) {
-                        servers.forEach(server -> server.getServerThread().setPriority(ModConfigManager.getConfig().backgroundPriority));
+                    if (ModConfig.backgroundPriority != 0) {
+                        servers.forEach(server -> server.getServerThread().setPriority(ModConfig.backgroundPriority));
                     }
                     ModLogger.log("Cancelled waiting for currently saving worlds.");
                     break;

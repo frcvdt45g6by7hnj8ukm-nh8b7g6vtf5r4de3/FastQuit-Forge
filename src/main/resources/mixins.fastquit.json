@@ -1,12 +1,11 @@
 {
   "required": true,
-  "minVersion": "0.8",
+  "minVersion": "0.8.5",
   "package": "com.kingcontaria.fastquit.mixin",
   "target": "@env(DEFAULT)",
-  "refmap": "${mixin_refmap}",
+  "refmap": "mixins.fastquit.refmap.json",
   "compatibilityLevel": "JAVA_8",
-  "client": [
-    "EditWorldScreenMixin",
+  "mixins": ["EditWorldScreenMixin",
     "MinecraftClientMixin",
     "MinecraftServerMixin",
     "SaveHandlerMixin",
@@ -15,10 +14,8 @@
     "WorldListWidgetWorldEntryMixin",
     "accessor.LevelStorageSessionAccessor",
     "accessor.MinecraftClientAccessor",
-    "accessor.MinecraftServerAccessor"
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  },
+    "accessor.MinecraftServerAccessor"],
+  "server": [],
+  "client": [],
   "plugin": "com.kingcontaria.fastquit.plugin.FastQuitMixinConfigPlugin"
 }

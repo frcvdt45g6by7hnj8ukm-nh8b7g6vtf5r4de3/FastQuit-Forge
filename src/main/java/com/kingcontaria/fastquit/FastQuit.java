@@ -1,17 +1,21 @@
 package com.kingcontaria.fastquit;
 
 import com.kingcontaria.fastquit.config.ModConfig;
-import com.kingcontaria.fastquit.config.ModConfigManager;
 import com.kingcontaria.fastquit.util.ModLogger;
-
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 
-@Mod(modid = FastQuit.MODID, name = "FastQuit")
+@Mod(modid = Tags.MOD_ID, name = Tags.MOD_NAME, version = Tags.VERSION)
 public class FastQuit {
     public static final String MODID = "fastquit";
     public FastQuit() {
-//        AutoConfig.register(ModConfig.class, Toml4jConfigSerializer::new);
-//        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> ModConfigManager::getConfigScreen);
         ModLogger.log("FastQuit Initialized!");
+    }
+
+    @Mod.EventHandler
+    public void init(FMLInitializationEvent event)
+    {
+        MinecraftForge.EVENT_BUS.register(ModConfig.class);
     }
 }
