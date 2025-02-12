@@ -1,0 +1,5 @@
+fastquit.toast.title=FastQuit valmis!
+fastquit.toast.description="%s" salvestamine lõpetatud
+fastquit.toast.deleted="%s" kustutati
+
+fastquit.screen.waiting="%s" salvestamise lõppemise ootamine...

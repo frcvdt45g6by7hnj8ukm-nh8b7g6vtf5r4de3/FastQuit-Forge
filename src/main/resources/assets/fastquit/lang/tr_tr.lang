@@ -1,0 +1,5 @@
+fastquit.toast.title=FastQuit uygulandı!
+fastquit.toast.description="%s" Kaydedildi'
+fastquit.toast.deleted="%s" Silindi
+
+fastquit.screen.waiting=Kaydetmek için "%s" bekleniyor...

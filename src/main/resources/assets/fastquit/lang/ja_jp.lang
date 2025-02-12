@@ -1,0 +1,4 @@
+fastquit.toast.title=FastQuit 完了!
+fastquit.toast.description=セーブ完了 "%s"
+fastquit.toast.deleted="%s" は削除済みです
+fastquit.screen.waiting="%s" の保存が終わるのを待っています...

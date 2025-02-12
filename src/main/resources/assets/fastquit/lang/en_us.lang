@@ -1,0 +1,5 @@
+fastquit.toast.title=FastQuit done!
+fastquit.toast.description=Finished saving "%s"
+fastquit.toast.deleted="%s" was deleted
+
+fastquit.screen.waiting=Waiting for "%s" to finish saving...

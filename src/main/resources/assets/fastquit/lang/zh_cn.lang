@@ -1,0 +1,5 @@
+fastquit.toast.title=快速退出完成！
+fastquit.toast.description=成功保存“%s”
+fastquit.toast.deleted=“%s”已被删除
+
+fastquit.screen.waiting=等待“%s”完成保存……

@@ -1,0 +1,5 @@
+fastquit.toast.title=Сохранение завершено.
+fastquit.toast.description=Мир "%s" успешно сохранён.
+fastquit.toast.deleted="%s" удалён
+
+fastquit.screen.waiting=Ожидание сохранения "%s"...

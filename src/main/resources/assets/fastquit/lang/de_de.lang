@@ -1,0 +1,5 @@
+fastquit.toast.title=FastQuit ist fertig!
+fastquit.toast.description=Speichern abgeschlossen "%s"
+fastquit.toast.deleted="%s" wurde gelöscht
+
+fastquit.screen.waiting=Warte auf das Speichern von "%s"...

@@ -1,0 +1,5 @@
+fastquit.toast.title=FastQuit effectué !
+fastquit.toast.description=Sauvegarde terminée de "%s"
+fastquit.toast.deleted="%s" a été supprimé
+
+fastquit.screen.waiting=En attente de la sauvegarde de "%s"...

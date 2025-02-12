@@ -1,0 +1,5 @@
+fastquit.toast.title=FastQuit đã xong!
+fastquit.toast.description=Đã lưu xong "%s"
+fastquit.toast.deleted="%s" đã bị xoá
+
+fastquit.screen.waiting="Chờ "%s" lưu xong...

@@ -1,0 +1,5 @@
+fastquit.toast.title=FastQuit zakończony!
+fastquit.toast.description=Zakończono zapisywanie "%s"
+fastquit.toast.deleted="%s" zostało usunięte
+
+fastquit.screen.waiting=Czekanie na zakończenie zapisywania "%s"...
