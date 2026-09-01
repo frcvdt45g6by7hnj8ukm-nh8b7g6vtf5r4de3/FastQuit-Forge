@@ -1,22 +1,9 @@
-buildscript {
-	repositories {
-		// These repositories are only for Gradle plugins, put any other repositories in the repository block further below
-		maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-		mavenCentral()
-	}
-	dependencies {
-		classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
-	}
-}
-
 plugins {
 	id 'eclipse'
 	id 'idea'
 	id 'maven-publish'
-	id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+	id 'net.neoforged.moddev.legacyforge' version '2.0.88'
 }
-
-apply plugin: 'org.spongepowered.mixin'
 
 version = project.mod_version
 group = project.maven_group
@@ -29,40 +16,42 @@ java {
 	toolchain.languageVersion = JavaLanguageVersion.of(17)
 }
 
-minecraft {
-	mappings channel: "official", version: "1.20.1"
-	copyIdeResources = true
+legacyForge {
+	version = "${minecraft_version}-${forge_version}"
 
 	runs {
 		configureEach {
-			workingDirectory project.file('run')
-			property 'forge.logging.markers', 'REGISTRIES'
-			property 'forge.logging.console.level', 'debug'
-
-			mods {
-				"${mod_id}" {
-					source sourceSets.main
-				}
-			}
+			gameDirectory = project.file('run')
+			systemProperty 'forge.logging.markers', 'REGISTRIES'
+			logLevel = org.slf4j.event.Level.DEBUG
 		}
 
 		client {
-			property 'forge.enabledGameTestNamespaces', mod_id
+			client()
+			systemProperty 'forge.enabledGameTestNamespaces', mod_id
 		}
 
 		server {
-			property 'forge.enabledGameTestNamespaces', mod_id
-			args '--nogui'
+			server()
+			systemProperty 'forge.enabledGameTestNamespaces', mod_id
+			programArgument '--nogui'
 		}
 
 		gameTestServer {
-			property 'forge.enabledGameTestNamespaces', mod_id
+			type = 'gameTestServer'
+			systemProperty 'forge.enabledGameTestNamespaces', mod_id
 		}
 
 		data {
-			workingDirectory project.file('run-data')
-
-			args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+			data()
+			gameDirectory = project.file('run-data')
+			programArguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').absolutePath,
+					'--existing', file('src/main/resources/').absolutePath
+		}
+	}
+	mods {
+		"${mod_id}" {
+			sourceSet sourceSets.main
 		}
 	}
 }
@@ -82,14 +71,16 @@ repositories {
 }
 
 dependencies {
-	minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-
-	implementation("me.shedaniel.cloth:cloth-config-forge:${project.cloth_config_version}")
+	modImplementation("me.shedaniel.cloth:cloth-config-forge:${project.cloth_config_version}")
+	compileOnly 'org.jetbrains:annotations:24.0.1'
 
 	annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 	compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:${mixinextras_version}"))
 	implementation(jarJar("io.github.llamalad7:mixinextras-forge:${mixinextras_version}")) {
-		jarJar.ranged(it, "[${mixinextras_version},)")
+		version {
+			strictly "[${mixinextras_version},)"
+			prefer mixinextras_version
+		}
 	}
 }
 
@@ -118,12 +109,11 @@ tasks.named('jar', Jar).configure {
 				"Implementation-Title": project.name,
 				"Implementation-Version": project.jar.archiveVersion,
 				"Implementation-Vendor": mod_authors,
-				"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+				"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+				"MixinConfigs": "${mod_id}.mixins.json"
 		])
 	}
 
-	// This is the preferred method to reobfuscate your jar file
-	finalizedBy 'reobfJar'
 }
 
 tasks.withType(JavaCompile).configureEach {
