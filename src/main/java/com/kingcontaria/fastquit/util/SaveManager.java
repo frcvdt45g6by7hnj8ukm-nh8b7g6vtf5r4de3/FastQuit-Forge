@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class SaveManager {
@@ -26,13 +27,67 @@ public class SaveManager {
      * 包含所有当前正在保存的 {@link IntegratedServer} 的同步 {@link Map}，其中包含带有更多世界信息的 {@link WorldInfo}。
      */
     public static final Map<IntegratedServer, WorldInfo> savingWorlds = Collections.synchronizedMap(new HashMap<>());
+    private static final AtomicBoolean REGION_CACHE_FLUSH_QUEUED = new AtomicBoolean();
+
+    /** Returns a stable snapshot; callers never retain the synchronized map's live view. */
+    public static List<IntegratedServer> snapshotSavingWorlds() {
+        synchronized (savingWorlds) {
+            return new ArrayList<>(savingWorlds.keySet());
+        }
+    }
+
+    public static boolean hasSavingWorlds() {
+        synchronized (savingWorlds) {
+            return !savingWorlds.isEmpty();
+        }
+    }
+
+    public static Thread getServerThread(IntegratedServer server) {
+        return ((MinecraftServerAccessor) server).fastquit$getThread();
+    }
+
+    public static Optional<IntegratedServer> getSavingServerForCurrentThread() {
+        return snapshotSavingWorlds().stream().filter(MinecraftServer::isCallingFromMinecraftThread).findFirst();
+    }
 
     /**
-     * Stores {@link ISaveFormat}'s used by FastQuit as to only close them if no other process is currently using them.
-     * <p>
-     * 存储由 FastQuit 使用的 {@link ISaveFormat}，以便仅在没有其他进程正在使用它们时关闭。
+     * The 1.12 region-file cache is global. Do not close it from one detached
+     * server while another detached or foreground integrated server is alive.
      */
-    public static final List<ISaveFormat> occupiedSessions = Collections.synchronizedList(new ArrayList<>());
+    public static boolean shouldDeferRegionFileCacheCloseForCurrentThread() {
+        Optional<IntegratedServer> currentOptional = getSavingServerForCurrentThread();
+        if (!currentOptional.isPresent()) return false;
+
+        IntegratedServer current = currentOptional.get();
+        for (IntegratedServer server : snapshotSavingWorlds()) {
+            if (server != current && getServerThread(server).isAlive()) return true;
+        }
+
+        IntegratedServer foreground = Minecraft.getMinecraft().getIntegratedServer();
+        return foreground != null && foreground != current && getServerThread(foreground).isAlive();
+    }
+
+    /** Close the global cache on the client thread once every server using it is idle. */
+    public static void requestRegionFileCacheFlush() {
+        if (!REGION_CACHE_FLUSH_QUEUED.compareAndSet(false, true)) return;
+
+        Minecraft client = Minecraft.getMinecraft();
+        try {
+            client.addScheduledTask(() -> {
+                try {
+                    if (hasSavingWorlds()) return;
+                    IntegratedServer foreground = client.getIntegratedServer();
+                    if (foreground != null && getServerThread(foreground).isAlive()) return;
+                    client.getSaveLoader().flushCache();
+                } finally {
+                    REGION_CACHE_FLUSH_QUEUED.set(false);
+                }
+            });
+        } catch (Throwable throwable) {
+            REGION_CACHE_FLUSH_QUEUED.set(false);
+            ModLogger.error("Failed to schedule the region-file cache close.", throwable);
+        }
+    }
 
     /**
      * Waits for all {@link IntegratedServer}'s to finish saving, gets called when Minecraft is closed.
@@ -46,16 +101,16 @@ public class SaveManager {
     public static void exit() {
         try {
             ModLogger.log("Exiting FastQuit.");
-            wait(savingWorlds.keySet());
+            wait(snapshotSavingWorlds());
         } catch (Throwable throwable) {
             ModLogger.error("Something went horribly wrong when exiting FastQuit!", throwable);
-            savingWorlds.forEach((server, info) -> {
+            for (IntegratedServer server : snapshotSavingWorlds()) {
                 try {
-                    server.getServerThread().join();
+                    getServerThread(server).join();
                 } catch (Throwable throwable2) {
                     ModLogger.error("Failed to wait for \"" + server.getWorldName() + "\"", throwable2);
                 }
-            });
+            }
         }
     }
 
@@ -97,6 +152,8 @@ public class SaveManager {
         if (servers == null || servers.isEmpty()) {
             return;
         }
+        // Never keep a live synchronized-map view across scheduling or rendering.
+        servers = new ArrayList<>(servers);
 
         Minecraft client = Minecraft.getMinecraft();
 
@@ -105,7 +162,8 @@ public class SaveManager {
                 throw new IllegalStateException("Tried to call FastQuit.wait(...) from one of the servers it's supposed to wait for.");
             }
 
-            client.addScheduledTask(() -> wait(servers));
+            Collection<IntegratedServer> scheduledServers = new ArrayList<>(servers);
+            client.addScheduledTask(() -> wait(scheduledServers));
             return;
         }
 
@@ -117,15 +175,15 @@ public class SaveManager {
         );
         ModLogger.log(stillSaving.getFormattedText());
 
-        servers.forEach(server -> server.getServerThread().setPriority(Thread.NORM_PRIORITY));
+        servers.forEach(server -> getServerThread(server).setPriority(Thread.NORM_PRIORITY));
 
         try {
             client.displayGuiScreen(new WaitingScreen(stillSaving, cancellable));
 
-            while (servers.stream().anyMatch(server -> !server.getServerThread().isAlive())) {
+            while (servers.stream().anyMatch(server -> getServerThread(server).isAlive())) {
                 if (cancellable != null && cancellable.isCancelled()) {
                     if (ModConfig.backgroundPriority != 0) {
-                        servers.forEach(server -> server.getServerThread().setPriority(ModConfig.backgroundPriority));
+                        servers.forEach(server -> getServerThread(server).setPriority(ModConfig.backgroundPriority));
                     }
                     ModLogger.log("Cancelled waiting for currently saving worlds.");
                     break;
@@ -148,7 +206,12 @@ public class SaveManager {
      * 可选地返回与给定 {@link Path} 匹配的当前 {@link IntegratedServer}。
      */
     public static Optional<IntegratedServer> getSavingWorld(Path path) {
-        return savingWorlds.keySet().stream().filter(server -> ((LevelStorageSessionAccessor) ((MinecraftServerAccessor) server).fastquit$getSession()).fastquit$getDirectory().toPath().equals(path)).findFirst();
+        Path normalized = path.toAbsolutePath().normalize();
+        return snapshotSavingWorlds().stream().filter(server ->
+                ((LevelStorageSessionAccessor) ((MinecraftServerAccessor) server).fastquit$getSession())
+                        .fastquit$getDirectory().toPath().resolve(((MinecraftServerAccessor) server).fastquit$getFolderName())
+                        .toAbsolutePath().normalize().equals(normalized))
+                .findFirst();
     }
 
     /**
@@ -157,7 +220,7 @@ public class SaveManager {
      * 可选地返回当前正在保存的 {@link IntegratedServer}，该服务器与给定的 {@link ISaveFormat} 匹配。
      */
     public static Optional<IntegratedServer> getSavingWorld(ISaveFormat session) {
-        return savingWorlds.keySet().stream().filter(server -> ((MinecraftServerAccessor) server).fastquit$getSession() == session).findFirst();
+        return snapshotSavingWorlds().stream().filter(server -> ((MinecraftServerAccessor) server).fastquit$getSession() == session).findFirst();
     }
 
     /**
@@ -166,7 +229,8 @@ public class SaveManager {
      * 可选地返回当前正在保存的 {@link IntegratedServer}，该服务器与给定的 {@link ISaveHandler} 匹配。
      */
     public static Optional<IntegratedServer> getSavingWorld(ISaveHandler session, String saveName) {
-        return savingWorlds.keySet().stream().filter(server -> ((MinecraftServerAccessor) server).fastquit$getSession().getSaveLoader(saveName, false) == session).findFirst();
+        return snapshotSavingWorlds().stream().filter(server -> server.getWorld(0) != null
+                && server.getWorld(0).getSaveHandler() == session).findFirst();
     }
     /**
      * @return optionally returns the {@link ISaveFormat} of the currently saving {@link IntegratedServer} matching the given {@link Path}
@@ -175,14 +239,8 @@ public class SaveManager {
      */
     public static Optional<ISaveFormat> getSession(Path path) {
         return getSavingWorld(path).flatMap(server -> {
-            ISaveFormat session;
-            synchronized (session = ((MinecraftServerAccessor) server).fastquit$getSession()) {
-//                if (((LevelStorageSessionAccessor) session).fastquit$getLock().isValid()) {
-                    occupiedSessions.add(session);
-                    return Optional.of(session);
-//                }
-            }
-//            return Optional.empty();
+            ISaveFormat session = ((MinecraftServerAccessor) server).fastquit$getSession();
+            return Optional.of(session);
         });
     }
 }

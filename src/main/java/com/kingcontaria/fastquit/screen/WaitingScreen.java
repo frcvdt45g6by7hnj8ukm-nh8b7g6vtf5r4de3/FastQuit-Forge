@@ -42,6 +42,9 @@ public class WaitingScreen extends GuiScreen {
 
     @Override
     protected void actionPerformed(GuiButton button) {
+        if (this.callbackInfo != null) {
+            this.callbackInfo.cancel();
+        }
         this.mc.displayGuiScreen(null);
     }
 }

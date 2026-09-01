@@ -46,6 +46,7 @@ public abstract class MinecraftServerMixin {
                 Minecraft.getMinecraft().addScheduledTask(() -> Minecraft.getMinecraft().getToastGui().add(new SystemToast(SystemToast.Type.NARRATOR_TOGGLE, TextHelper.translatable("fastquit.toast.title"), description)));
             }
             ModLogger.log(description.getUnformattedText());
+            SaveManager.requestRegionFileCacheFlush();
         }
     }
 

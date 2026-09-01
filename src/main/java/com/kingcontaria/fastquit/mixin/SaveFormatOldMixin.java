@@ -45,7 +45,7 @@ public abstract class SaveFormatOldMixin {
     @Inject(method = "getSaveLoader", at = @At("HEAD"))
     public void fastquit$waitForSaveOnSessionCreation(String saveName, boolean storePlayerdata, CallbackInfoReturnable<ISaveHandler> cir){
         if (!ModConfig.allowMultipleServers()) {
-            SaveManager.wait(SaveManager.savingWorlds.keySet());
+            SaveManager.wait(SaveManager.snapshotSavingWorlds());
         }
         SaveManager.getSavingWorld(this.savesDirectory.toPath().resolve(saveName)).ifPresent(SaveManager::wait);
     }

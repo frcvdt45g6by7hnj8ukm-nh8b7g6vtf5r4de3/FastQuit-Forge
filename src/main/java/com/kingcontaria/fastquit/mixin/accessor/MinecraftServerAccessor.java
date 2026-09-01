@@ -11,4 +11,6 @@ public interface MinecraftServerAccessor {
     Thread fastquit$getThread();
     @Accessor("anvilConverterForAnvilFile")
     ISaveFormat fastquit$getSession();
+    @Accessor("folderName")
+    String fastquit$getFolderName();
 }
