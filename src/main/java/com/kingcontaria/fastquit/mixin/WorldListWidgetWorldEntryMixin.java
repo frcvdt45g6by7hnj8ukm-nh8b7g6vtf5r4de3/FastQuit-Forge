@@ -43,14 +43,14 @@ public abstract class WorldListWidgetWorldEntryMixin {
         this.minecraft.setScreen(this.screen);
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Font;m_92883_(Lcom/mojang/blaze3d/vertex/PoseStack;Ljava/lang/String;FFI)I", ordinal = 0, shift = At.Shift.AFTER))
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Font;draw(Lcom/mojang/blaze3d/vertex/PoseStack;Ljava/lang/String;FFI)I", ordinal = 0, shift = At.Shift.AFTER))
     private void fastquit$renderSavingTimeOnWorldList(PoseStack context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta, CallbackInfo ci) {
         if (ModConfigManager.getConfig().showSavingTime == ModConfig.ShowSavingTime.TRUE) {
             SaveManager.getSavingWorld(this.minecraft.getLevelSource().getBaseDir().resolve(this.summary.getLevelId())).ifPresent(server -> {
                 WorldInfo info = SaveManager.savingWorlds.get(server);
                 if (info != null) {
                     String time = info.getTimeSaving() + " ⌛";
-                    this.minecraft.font.m_92883_(context, time, x + entryWidth - this.minecraft.font.width(time) - 4, y + 1, -6939106);
+                    this.minecraft.font.draw(context, time, x + entryWidth - this.minecraft.font.width(time) - 4, y + 1, -6939106);
                 }
             });
         }
