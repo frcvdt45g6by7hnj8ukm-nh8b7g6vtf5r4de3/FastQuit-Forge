@@ -1,28 +1,28 @@
 modLoader = "javafml"
-loaderVersion = "[45,)"
-license = "MIT"
+loaderVersion = "${loader_version_range}"
+license = "${mod_license}"
 [[mods]]
-modId = "fastquit"
+modId = "${mod_id}"
 logoFile = "icon.png"
-version = "3.0.1+1.19.4forge"
-displayName = "FastQuit"
-description = "This mod lets you return to the Title Screen early while your world is still saving in the background."
-authors = "KingContaria, Kaleb Langley"
-[[dependencies.fastquit]]
+version = "${mod_version}"
+displayName = "${mod_name}"
+description = "${mod_description}"
+authors = "${mod_authors}"
+[[dependencies."${mod_id}"]]
 modId = "forge"
 mandatory = true
-versionRange = "[45,)"
+versionRange = "${forge_version_range}"
 ordering = "NONE"
 side = "BOTH"
-[[dependencies.fastquit]]
+[[dependencies."${mod_id}"]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.19.3,1.20)"
+versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "BOTH"
-[[dependencies.fastquit]]
+[[dependencies."${mod_id}"]]
 modId="cloth_config"
 mandatory=true
-versionRange="[10.1.135,)"
+versionRange="[${cloth_config_version},)"
 ordering="NONE"
 side="BOTH"
