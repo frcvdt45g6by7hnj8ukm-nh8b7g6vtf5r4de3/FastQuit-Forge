@@ -35,10 +35,10 @@ public class WaitingScreen extends GenericDirtMessageScreen {
     }
 
     @Override
-    public void m_6305_(@NotNull PoseStack context, int mouseX, int mouseY, float delta) {
-        super.m_6305_(context, mouseX, mouseY, delta);
+    public void render(@NotNull PoseStack context, int mouseX, int mouseY, float delta) {
+        super.render(context, mouseX, mouseY, delta);
         String loading = LoadingDotsText.get(Util.getMillis());
-        this.minecraft.font.m_92883_(context, loading, (float) (this.width - this.minecraft.font.width(loading)) / 2, 95, 0x808080);
+        this.minecraft.font.draw(context, loading, (float) (this.width - this.minecraft.font.width(loading)) / 2, 95, 0x808080);
     }
 
     @Override
