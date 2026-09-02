@@ -25,6 +25,13 @@ public class SaveManager {
      */
     public static final Map<IntegratedServer, WorldInfo> savingWorlds = Collections.synchronizedMap(new HashMap<>());
 
+    /** Returns a stable snapshot so callers never iterate the synchronized map's live view. */
+    public static List<IntegratedServer> snapshotSavingWorlds() {
+        synchronized (savingWorlds) {
+            return new ArrayList<>(savingWorlds.keySet());
+        }
+    }
+
     /**
      * Stores {@link SaveFormat.LevelSave}'s used by FastQuit as to only close them if no other process is currently using them.
      * <p>
@@ -44,16 +51,16 @@ public class SaveManager {
     public static void exit() {
         try {
             ModLogger.log("Exiting FastQuit.");
-            wait(savingWorlds.keySet());
+            wait(snapshotSavingWorlds());
         } catch (Throwable throwable) {
             ModLogger.error("Something went horribly wrong when exiting FastQuit!", throwable);
-            savingWorlds.forEach((server, info) -> {
+            for (IntegratedServer server : snapshotSavingWorlds()) {
                 try {
                     server.getRunningThread().join();
                 } catch (Throwable throwable2) {
                     ModLogger.error("Failed to wait for \"" + server.getWorldData().getLevelName() + "\"", throwable2);
                 }
-            });
+            }
         }
     }
 
@@ -95,6 +102,7 @@ public class SaveManager {
         if (servers == null || servers.isEmpty()) {
             return;
         }
+        servers = new ArrayList<>(servers);
 
         Minecraft client = Minecraft.getInstance();
 
@@ -103,7 +111,8 @@ public class SaveManager {
                 throw new IllegalStateException("Tried to call FastQuit.wait(...) from one of the servers it's supposed to wait for.");
             }
 
-            client.submit(() -> wait(servers)).join();
+            Collection<IntegratedServer> scheduledServers = new ArrayList<>(servers);
+            client.submit(() -> wait(scheduledServers)).join();
             return;
         }
 
@@ -146,7 +155,8 @@ public class SaveManager {
      * 可选地返回与给定 {@link Path} 匹配的当前 {@link IntegratedServer}。
      */
     public static Optional<IntegratedServer> getSavingWorld(Path path) {
-        return savingWorlds.keySet().stream().filter(server -> ((LevelStorageSessionAccessor) ((MinecraftServerAccessor) server).fastquit$getSession()).fastquit$getDirectory().equals(path)).findFirst();
+        Path normalized = path.toAbsolutePath().normalize();
+        return snapshotSavingWorlds().stream().filter(server -> ((LevelStorageSessionAccessor) ((MinecraftServerAccessor) server).fastquit$getSession()).fastquit$getDirectory().toAbsolutePath().normalize().equals(normalized)).findFirst();
     }
 
     /**
@@ -155,7 +165,7 @@ public class SaveManager {
      * 可选地返回当前正在保存的 {@link IntegratedServer}，该服务器与给定的 {@link SaveFormat.LevelSave} 匹配。
      */
     public static Optional<IntegratedServer> getSavingWorld(SaveFormat.LevelSave session) {
-        return savingWorlds.keySet().stream().filter(server -> ((MinecraftServerAccessor) server).fastquit$getSession() == session).findFirst();
+        return snapshotSavingWorlds().stream().filter(server -> ((MinecraftServerAccessor) server).fastquit$getSession() == session).findFirst();
     }
 
     /**
